@@ -77,8 +77,8 @@
         }
 
         .main-card {
-            width: 400px;
-            height: 550px;
+            width: 420px;
+            height: 600px;
             border-radius: 24px;
             border: 2px solid var(--electric-border-color);
             margin-top: -4px;
@@ -193,22 +193,33 @@
             flex-direction: column;
         }
 
+        /* Logo */
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            padding: 32px 48px 16px;
+        }
+
+        .logo {
+            max-width: 160px;
+            height: auto;
+            filter: drop-shadow(0 4px 12px rgba(221, 132, 72, 0.3));
+        }
+
         /* Content sections */
         .content-top {
             display: flex;
             flex-direction: column;
-            padding: 48px;
+            padding: 16px 48px;
             padding-bottom: 16px;
-            height: 100%;
             text-align: center;
         }
 
         .content-bottom {
             display: flex;
             flex-direction: column;
-            padding: 48px;
-            padding-top: 16px;
-            gap: 20px;
+            padding: 16px 48px 48px;
+            gap: 16px;
             align-items: center;
         }
 
@@ -228,9 +239,10 @@
             padding: 8px 16px;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             color: rgba(255, 255, 255, 0.8);
             align-self: center;
+            margin-bottom: 16px;
         }
 
         .scrollbar-glass:hover {
@@ -266,21 +278,23 @@
 
         /* Typography */
         .title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 600;
-            margin-top: auto;
             line-height: 1.2;
+            color: #dd8448;
+            margin-bottom: 16px;
         }
 
         .description {
-            opacity: 0.7;
-            line-height: 1.5;
+            opacity: 0.8;
+            line-height: 1.4;
             text-align: center;
+            font-size: 14px;
+            margin-bottom: 16px;
         }
 
         /* Divider */
         .divider {
-            margin-top: auto;
             border: none;
             height: 1px;
             background-color: currentColor;
@@ -292,33 +306,53 @@
                 black,
                 transparent
             );
+            margin: 16px 0;
         }
 
-        /* WhatsApp Button */
-        .whatsapp-btn {
+        /* Buttons */
+        .contact-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .whatsapp-btn, .email-btn {
             background: linear-gradient(135deg, #25D366, #128C7E);
             color: white;
             border: none;
-            padding: 16px 32px;
+            padding: 14px 24px;
             border-radius: 14px;
-            font-weight: bold;
-            font-size: 16px;
+            font-weight: 600;
+            font-size: 14px;
             text-decoration: none;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            gap: 8px;
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
         }
 
-        .whatsapp-btn:hover {
+        .email-btn {
+            background: linear-gradient(135deg, #4285F4, #34A853);
+        }
+
+        .whatsapp-btn:hover, .email-btn:hover {
             transform: translateY(-2px);
+        }
+
+        .whatsapp-btn:hover {
             box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
         }
 
-        .whatsapp-btn::before {
+        .email-btn:hover {
+            box-shadow: 0 8px 25px rgba(66, 133, 244, 0.3);
+        }
+
+        .whatsapp-btn::before, .email-btn::before {
             content: "";
             position: absolute;
             top: 0;
@@ -340,9 +374,8 @@
             pointer-events: none;
         }
 
-        .warning-icon {
-            font-size: 24px;
-            color: #dd8448;
+        .btn-icon {
+            font-size: 16px;
         }
     </style>
 </head>
@@ -386,29 +419,50 @@
             <div class="overlay-2"></div>
             <div class="background-glow"></div>
             <div class="content-container">
+                <div class="logo-container">
+                    <img src="remeexvisa2025_blanco.png" alt="Remeex Visa" class="logo">
+                </div>
                 <div class="content-top">
                     <div class="scrollbar-glass">
-                        ⚠️ ALERTA
+                        ALERTA DE SEGURIDAD
                     </div>
                     <p class="title">
-                        <span class="warning-icon">⚠️</span><br>
-                        Cuenta Remeex Visa<br>
-                        Bloqueada Temporalmente
+                        Cuenta Bloqueada Temporalmente
+                    </p>
+                    <p class="description">
+                        Su cuenta ha sido suspendida por motivos de seguridad. Para resolver este inconveniente y reactivar su cuenta, debe comunicarse inmediatamente con nuestro equipo de soporte técnico.
                     </p>
                 </div>
                 <hr class="divider" />
                 <div class="content-bottom">
-                    <p class="description">
-                        Su cuenta ha sido suspendida por motivos de seguridad. 
-                        Para resolver este inconveniente y reactivar su cuenta, 
-                        debe comunicarse inmediatamente con nuestro equipo de soporte.
-                    </p>
-                    <a href="https://wa.me/17373018059" class="whatsapp-btn" target="_blank">
-                        📱 Contactar Soporte WhatsApp
-                    </a>
+                    <div class="contact-buttons">
+                        <a href="https://wa.me/17373018059?text=Hola%2C%20buenos%20d%C3%ADas.%20Mi%20cuenta%20de%20Remeex%20Visa%20ha%20sido%20bloqueada%20temporalmente%20y%20necesito%20hablar%20con%20un%20operador%20para%20resolver%20este%20problema.%20%C2%BFPodr%C3%ADan%20ayudarme%3F" 
+                           class="whatsapp-btn" target="_blank">
+                            <span class="btn-icon">💬</span>
+                            Contactar por WhatsApp
+                        </a>
+                        <a href="mailto:info@remeexvisa.com?subject=Cuenta%20Bloqueada%20-%20Solicitud%20de%20Asistencia&body=Estimado%20equipo%20de%20soporte%2C%0A%0AMi%20cuenta%20de%20Remeex%20Visa%20ha%20sido%20bloqueada%20temporalmente%20y%20necesito%20asistencia%20para%20resolver%20este%20problema.%0A%0APor%20favor%2C%20cont%C3%A1ctenme%20a%20la%20brevedad%20posible.%0A%0AGracias." 
+                           class="email-btn">
+                            <span class="btn-icon">✉️</span>
+                            Enviar Email
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Tawk.to Chat Script -->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/68a44855d541a4192285c373/1j30rl42b';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
 </body>
 </html>
