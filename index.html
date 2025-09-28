@@ -488,6 +488,16 @@
       resize: vertical;
     }
 
+    .char-counter {
+      font-size: var(--fs-xs);
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    .char-counter.is-valid {
+      color: var(--accent);
+    }
+
     /* Opciones de radio móviles */
     .options-grid {
       display: grid;
@@ -1444,9 +1454,10 @@
             <!-- Descripción del caso -->
             <div class="form-group">
               <label class="form-label" for="descripcion">Describe tu caso (mínimo 140 caracteres)</label>
-              <textarea id="descripcion" name="descripcion" class="form-input form-textarea" 
-                        minlength="140" required 
+              <textarea id="descripcion" name="descripcion" class="form-input form-textarea"
+                        minlength="140" required
                         placeholder="Ej.: Transferí desde mi cuenta bancaria y estoy esperando verificación..."></textarea>
+              <p id="descripcionCounter" class="char-counter">Te faltan 140 caracteres para completar el mínimo.</p>
             </div>
             
             <div class="wizard-navigation">
@@ -1852,6 +1863,7 @@
         this.currentStep = 1;
         this.totalSteps = 3;
         this.form = $('#wizardForm');
+        this.updateDescriptionCounter();
         this.setupEventListeners();
       }
 
@@ -1872,6 +1884,11 @@
         });
 
         this.currentStep = step;
+
+        if (step === 2) {
+          this.updateDescriptionCounter();
+        }
+
         return true;
       }
 
@@ -1968,6 +1985,28 @@
         }
       }
 
+      updateDescriptionCounter() {
+        const description = $('#descripcion');
+        const counter = $('#descripcionCounter');
+        if (!description || !counter) return;
+
+        const minLength = 140;
+        const text = description.value.trim();
+        const currentLength = text.length;
+        const remaining = Math.max(minLength - currentLength, 0);
+
+        if (!currentLength) {
+          counter.textContent = `Te faltan ${minLength} caracteres para completar el mínimo.`;
+        } else if (remaining > 0) {
+          const label = remaining === 1 ? 'carácter' : 'caracteres';
+          counter.textContent = `Te faltan ${remaining} ${label} para completar el mínimo.`;
+        } else {
+          counter.textContent = '¡Perfecto! Ya completaste el mínimo de 140 caracteres.';
+        }
+
+        counter.classList.toggle('is-valid', remaining === 0);
+      }
+
       setupEventListeners() {
         // Navegación
         $('#nextStep1')?.addEventListener('click', () => {
@@ -1999,6 +2038,10 @@
           }
         });
 
+        $('#descripcion')?.addEventListener('input', () => {
+          this.updateDescriptionCounter();
+        });
+
         // Detectar firma en motivo
         $$('input[name="motivo"]').forEach(radio => {
           radio.addEventListener('change', (e) => {
@@ -2006,6 +2049,9 @@
             if (value.includes('firma')) {
               overlayManager.hide('wizardOverlay');
               overlayManager.show('signatureOverlay');
+              requestAnimationFrame(() => {
+                signatureManager.refreshCanvas();
+              });
             }
           });
         });
@@ -2116,10 +2162,30 @@
         this.scale = dpr;
 
         if (this.ctx) {
+          this.ctx.setTransform(1, 0, 0, 1, 0, 0);
           this.ctx.scale(dpr, dpr);
         }
 
         this.redraw();
+      }
+
+      refreshCanvas() {
+        if (!this.canvas) return;
+
+        this.isDrawing = false;
+        this.currentStroke = [];
+        this.strokes = [];
+        this.undoStack = [];
+        this.hasContent = false;
+
+        if (this.ctx) {
+          this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+
+        this.resizeCanvas();
+        this.updateStatus('El lienzo está listo. Traza tu firma para continuar.', '');
+        this.updateButtons();
       }
 
       getEventPos(e) {
