@@ -117,6 +117,7 @@
       color: white; text-decoration: none; font-weight: 700; font-size: var(--fs-md);
       border: 1px solid rgba(255,255,255,.2);
       transition: transform .15s ease, box-shadow .2s ease;
+      cursor: pointer;
     }
     .btn:focus-visible { outline: 2px solid var(--visa-gold); outline-offset: 3px; }
     .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(20,39,135,.3); }
@@ -151,6 +152,99 @@
       .bg-video { display: none; }
       .intro { display: none; }
     }
+
+    /* Overlay Wizard */
+    .overlay {
+      position: fixed; inset: 0; z-index: 70;
+      display: grid; place-items: center;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(4px);
+      padding: 16px;
+    }
+    .overlay__panel {
+      width: min(560px, 96vw);
+      max-height: min(88vh, 720px);
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(26,31,113,.85), rgba(20,39,135,.75));
+      border: 1px solid rgba(247,182,0,.35);
+      border-radius: 20px;
+      box-shadow: var(--ok-shadow);
+      padding: 18px;
+      position: relative;
+      color: var(--text);
+    }
+    .overlay__panel::after{
+      content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
+      background: linear-gradient(135deg, var(--visa-gold), var(--visa-blue), var(--visa-gold));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor; mask-composite: exclude; opacity:.7; animation: edge 6s linear infinite;
+    }
+    .overlay__header {
+      display:flex; align-items:center; justify-content:space-between; gap:8px; position: sticky; top: -18px; padding-top: 18px; background: linear-gradient(180deg, rgba(26,31,113,.95), rgba(26,31,113,0));
+      margin: -18px -18px 8px; padding: 18px;
+    }
+    .overlay__title { font-size: var(--fs-xl); font-weight: 800; color: var(--visa-gold); }
+    .overlay__close { appearance:none; border:1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.25); color:#fff; border-radius: 999px; padding:8px 12px; font-weight:700; cursor:pointer; }
+    .steps { display:flex; gap:6px; margin-bottom:10px; }
+    .step { flex:1; height:6px; border-radius:999px; background: rgba(255,255,255,.18); overflow:hidden; }
+    .step.is-active, .step.is-done { background: linear-gradient(90deg, var(--visa-gold), #ffd36b); }
+    .form-grid { display:grid; gap:10px; }
+    .row { display:grid; gap:8px; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    label { font-size: var(--fs-sm); color: var(--muted); }
+    input[type="text"], input[type="email"], select, textarea {
+      width:100%; padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,.22);
+      background: rgba(0,0,0,.18); color:#fff; font-size: var(--fs-md);
+    }
+    textarea { min-height: 110px; resize: vertical; }
+    .options { display:grid; gap:8px; grid-template-columns: 1fr 1fr; }
+    .opt {
+      display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid rgba(255,255,255,.22); border-radius:12px;
+      background: rgba(0,0,0,.14); cursor: pointer;
+    }
+    .opt input { accent-color: var(--visa-gold); }
+    .wizard-nav { display:flex; gap:10px; justify-content:space-between; margin-top: 10px; }
+    .btn--ghost { background: transparent; border:1px solid rgba(255,255,255,.35); }
+    .btn[disabled] { opacity:.5; cursor:not-allowed; }
+    .preview { white-space: pre-wrap; background: rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:12px; font-size: var(--fs-sm); }
+    .mini { font-size: 12px; color: rgba(255,255,255,.7); }
+
+    /* Spinner overlay */
+    .spinner {
+      position: fixed; inset: 0; z-index: 90;
+      display: none; place-items: center;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+    }
+    .spinner.is-on { display: grid; }
+    .spinner__box {
+      background: linear-gradient(180deg, rgba(26,31,113,.85), rgba(20,39,135,.75));
+      border: 1px solid rgba(247,182,0,.35); border-radius: 16px; padding: 20px 24px;
+      box-shadow: var(--ok-shadow); text-align: center; color: #fff; min-width: 260px;
+    }
+    .loader {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 4px solid rgba(255,255,255,.25);
+      border-top-color: var(--visa-gold);
+      animation: spin 1s linear infinite; margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Overlay advertencia suspensión */
+    .suspension {
+      position: fixed; inset: 0; z-index: 95;
+      display: none; place-items: center;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+      padding: 16px;
+    }
+    .suspension.is-on { display: grid; }
+    .suspension__panel {
+      width: min(560px, 96vw);
+      background: linear-gradient(180deg, rgba(26,31,113,.88), rgba(20,39,135,.78));
+      border: 1px solid rgba(247,182,0,.35);
+      border-radius: 18px; padding: 18px; color: #fff; box-shadow: var(--ok-shadow);
+    }
+    .suspension__title { font-size: var(--fs-xl); font-weight: 800; color: var(--visa-gold); margin-bottom: 6px; }
+    .suspension__actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
   </style>
 </head>
 <body>
@@ -176,7 +270,7 @@
       </div>
       <footer class="card__footer">
         <div class="cta">
-          <a class="btn btn--wa" target="_blank" rel="noopener" href="https://wa.me/17373018059?text=Hola%2C%20buenos%20d%C3%ADas.%20Mi%20cuenta%20de%20Remeex%20Visa%20ha%20sido%20bloqueada%20temporalmente%20y%20necesito%20hablar%20con%20un%20operador%20para%20resolver%20este%20problema.%20%C2%BFPodr%C3%ADan%20ayudarme%3F">Contactar por WhatsApp</a>
+          <button id="btnSolicitar" class="btn btn--wa" type="button">Solicitar desbloqueo</button>
           <a class="btn btn--mail" href="mailto:info@remeexvisa.com?subject=Cuenta%20Bloqueada%20-%20Solicitud%20de%20Asistencia&body=Estimado%20equipo%20de%20soporte%2C%0A%0AMi%20cuenta%20de%20Remeex%20Visa%20ha%20sido%20bloqueada%20temporalmente%20y%20necesito%20asistencia%20para%20resolver%20este%20problema.%0A%0APor%20favor%2C%20cont%C3%A1ctenme%20a%20la%20brevedad%20posible.%0A%0AGracias.">Enviar Email</a>
         </div>
       </footer>
@@ -184,6 +278,153 @@
     <div aria-hidden="true" style="height:6px"></div>
   </div>
 
+  <!-- OVERLAY WIZARD -->
+  <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="wizardTitle">
+    <div class="overlay__panel">
+      <div class="overlay__header">
+        <div>
+          <div class="overlay__title" id="wizardTitle">Solicitud de Desbloqueo</div>
+          <div class="mini">Completa los pasos para generar el mensaje automático de WhatsApp.</div>
+        </div>
+        <button class="overlay__close" id="closeOverlay" type="button" aria-label="Cerrar">Cerrar</button>
+      </div>
+
+      <div class="steps" aria-hidden="true">
+        <div class="step is-active" data-stepbar="1"></div>
+        <div class="step" data-stepbar="2"></div>
+        <div class="step" data-stepbar="3"></div>
+      </div>
+
+      <form id="unlockForm" class="form-grid" novalidate>
+        <!-- PASO 1 -->
+        <section class="row" data-step="1">
+          <div class="row grid-2">
+            <div>
+              <label for="nombre">Nombre</label>
+              <input id="nombre" name="nombre" type="text" autocomplete="given-name" required placeholder="Nombre" />
+            </div>
+            <div>
+              <label for="apellido">Apellido</label>
+              <input id="apellido" name="apellido" type="text" autocomplete="family-name" required placeholder="Apellido" />
+            </div>
+          </div>
+          <div class="row grid-2">
+            <div>
+              <label for="cedula">Cédula de identidad</label>
+              <input id="cedula" name="cedula" type="text" inputmode="numeric" required placeholder="V-12345678" />
+            </div>
+            <div>
+              <label for="email">Email asociado</label>
+              <input id="email" name="email" type="email" autocomplete="email" required placeholder="tu@correo.com" />
+            </div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn--ghost" id="cancelWizard">Cancelar</button>
+            <button type="button" class="btn btn--wa" id="next1">Continuar</button>
+          </div>
+        </section>
+
+        <!-- PASO 2 -->
+        <section class="row hidden" data-step="2">
+          <div class="row">
+            <label>¿Por qué no has validado tu cuenta?</label>
+            <div class="options">
+              <label class="opt"><input type="radio" name="razon" value="Desconfianza" required /> Desconfianza</label>
+              <label class="opt"><input type="radio" name="razon" value="Falta de tiempo" /> Falta de tiempo</label>
+              <label class="opt"><input type="radio" name="razon" value="Dificultad técnica" /> Dificultad técnica</label>
+              <label class="opt"><input type="radio" name="razon" value="No entiendo el proceso" /> No entiendo el proceso</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <label>¿Eres el titular de los fondos?</label>
+            <div class="options">
+              <label class="opt"><input type="radio" name="titular" value="Sí, soy el titular" required /> Sí</label>
+              <label class="opt"><input type="radio" name="titular" value="No, actúo por un familiar" /> No / Familiar</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <label>¿Tienes algún comprobante que demuestre titularidad de los fondos?</label>
+            <div class="options">
+              <label class="opt"><input type="radio" name="comprobante" value="Sí, tengo comprobantes" required /> Sí</label>
+              <label class="opt"><input type="radio" name="comprobante" value="No tengo" /> No tengo</label>
+            </div>
+          </div>
+
+          <!-- MOTIVO CONOCIDO DEL BLOQUEO -->
+          <div class="row">
+            <label>¿Conoces el motivo de por qué tu cuenta fue bloqueada?</label>
+            <div class="options">
+              <label class="opt"><input type="radio" name="motivo" value="Cédula deteriorada" required /> Cédula deteriorada</label>
+              <label class="opt"><input type="radio" name="motivo" value="No coinciden datos biométricos" /> No coinciden los datos biométricos</label>
+              <label class="opt"><input type="radio" name="motivo" value="Datos falsos o inconsistentes" /> Datos falsos o inconsistentes</label>
+              <label class="opt"><input type="radio" name="motivo" value="Incompatibilidad de documentos" /> Incompatibilidad de documentos</label>
+              <label class="opt"><input type="radio" name="motivo" value="Problemas con la firma" /> Problemas con mi firma</label>
+              <label class="opt"><input type="radio" name="motivo" value="Olvidé la clave/PIN" /> Olvidé la clave/PIN</label>
+              <label class="opt"><input type="radio" name="motivo" value="Intentos fallidos de verificación" /> Intentos fallidos de verificación</label>
+              <label class="opt"><input type="radio" name="motivo" value="Documento vencido" /> Documento vencido</label>
+              <label class="opt"><input type="radio" name="motivo" value="Actividad o IP inusual" /> Actividad o IP inusual</label>
+              <label class="opt"><input type="radio" name="motivo" value="Selfie no coincide con documento" /> Selfie no coincide con documento</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <label for="detalle">Describe brevemente tu caso (opcional)</label>
+            <textarea id="detalle" name="detalle" placeholder="Ej.: Transferí desde mi cuenta bancaria y estoy esperando verificación..."></textarea>
+          </div>
+
+          <div class="wizard-nav">
+            <button type="button" class="btn btn--ghost" id="back2">Volver</button>
+            <button type="button" class="btn btn--wa" id="next2">Continuar</button>
+          </div>
+        </section>
+
+        <!-- PASO 3 -->
+        <section class="row hidden" data-step="3">
+          <div class="row">
+            <label>Revisa el mensaje que se enviará por WhatsApp</label>
+            <div id="preview" class="preview"></div>
+            <div class="mini">Si algo falta, vuelve atrás y completa la información.</div>
+          </div>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn--ghost" id="back3">Volver</button>
+            <a id="sendWa" class="btn btn--wa" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+          </div>
+        </section>
+      </form>
+    </div>
+  </div>
+
+  <!-- Spinner de análisis -->
+  <div id="spinner" class="spinner" aria-live="polite" aria-busy="true">
+    <div class="spinner__box">
+      <div class="loader" aria-hidden="true"></div>
+      <div>Analizando tu solicitud...</div>
+      <div class="mini">Esto puede tardar unos segundos</div>
+    </div>
+  </div>
+
+  <!-- Overlay de advertencia de suspensión -->
+  <div id="suspension" class="suspension" role="alertdialog" aria-labelledby="suspTitle" aria-modal="true">
+    <div class="suspension__panel">
+      <div class="suspension__title" id="suspTitle">Aviso importante de seguridad</div>
+      <p class="mini" style="font-size: var(--fs-md); color: var(--muted);">
+        Tu cuenta se encuentra <strong>bloqueada temporalmente</strong>. Si no corriges esta situación,
+        podría ser <strong>suspendida próximamente</strong> para proteger a nuestros usuarios, evitar fraudes y
+        cumplir con controles de <em>legitimación de capitales (AML)</em> y normas KYC.
+      </p>
+      <p class="mini" style="font-size: var(--fs-sm);">
+        Completa la información y envíanos tu solicitud para acelerar la revisión.
+      </p>
+      <div class="suspension__actions">
+        <button id="suspDismiss" class="btn btn--ghost" type="button">Entendido</button>
+        <button id="suspGo" class="btn btn--wa" type="button">Continuar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tawk -->
   <script>
     var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
     (function(){
@@ -195,6 +436,8 @@
       s0.parentNode.insertBefore(s1,s0);
     })();
   </script>
+
+  <!-- Intro videos control -->
   <script>
     (function(){
       const intro = document.getElementById('intro');
@@ -214,6 +457,176 @@
       document.addEventListener('touchstart', enablePlay, { once: true, passive: true });
       document.addEventListener('click', enablePlay, { once: true });
       setTimeout(endIntro, 8000);
+    })();
+  </script>
+
+  <!-- Wizard logic -->
+  <script>
+    (function(){
+      const phoneNumber = '17373018059'; // <- Cambia este número si necesitas otro WhatsApp
+
+      const qs = s => document.querySelector(s);
+      const qsa = s => Array.from(document.querySelectorAll(s));
+
+      const overlay = qs('#overlay');
+      const btnSolicitar = qs('#btnSolicitar');
+      const closeOverlay = qs('#closeOverlay');
+      const cancelWizard = qs('#cancelWizard');
+
+      const form = qs('#unlockForm');
+      const steps = qsa('[data-step]');
+      const bars = qsa('[data-stepbar]');
+      const next1 = qs('#next1');
+      const next2 = qs('#next2');
+      const back2 = qs('#back2');
+      const back3 = qs('#back3');
+      const preview = qs('#preview');
+      const sendWa = qs('#sendWa');
+
+      const spinner = document.getElementById('spinner');
+
+      const suspension = document.getElementById('suspension');
+      const suspDismiss = document.getElementById('suspDismiss');
+      const suspGo = document.getElementById('suspGo');
+      let suspShown = false;
+
+      function showOverlay() {
+        overlay.classList.remove('hidden');
+        setStep(1);
+        const first = qs('#nombre');
+        first && first.focus();
+      }
+      function hideOverlay() { overlay.classList.add('hidden'); }
+
+      function setStep(n){
+        steps.forEach(sec => sec.classList.toggle('hidden', sec.getAttribute('data-step') !== String(n)));
+        bars.forEach(bar => {
+          const i = Number(bar.getAttribute('data-stepbar'));
+          bar.classList.toggle('is-active', i === n);
+          bar.classList.toggle('is-done', i < n);
+        });
+      }
+
+      function valStep1(){
+        const required = ['#nombre','#apellido','#cedula','#email'].map(qs);
+        let ok = true;
+        required.forEach(el=>{
+          const validEmail = el.id==='email' ? /^\S+@\S+\.\S+$/.test(el.value) : true;
+          if(!el.value.trim() || !validEmail){
+            el.style.borderColor = '#ffb3b3';
+            ok = false;
+          } else {
+            el.style.borderColor = 'rgba(255,255,255,.22)';
+          }
+        });
+        return ok;
+      }
+
+      function valStep2(){
+        const r1 = form.querySelector('input[name="razon"]:checked');
+        const r2 = form.querySelector('input[name="titular"]:checked');
+        const r3 = form.querySelector('input[name="comprobante"]:checked');
+        const r4 = form.querySelector('input[name="motivo"]:checked');
+        return !!(r1 && r2 && r3 && r4);
+      }
+
+      function composeMessage(){
+        const nombre = qs('#nombre').value.trim();
+        const apellido = qs('#apellido').value.trim();
+        const cedula = qs('#cedula').value.trim();
+        const email = qs('#email').value.trim();
+
+        const razon = (form.querySelector('input[name="razon"]:checked')||{}).value || '';
+        const titular = (form.querySelector('input[name="titular"]:checked')||{}).value || '';
+        const comprobante = (form.querySelector('input[name="comprobante"]:checked')||{}).value || '';
+        const motivo = (form.querySelector('input[name="motivo"]:checked')||{}).value || '';
+        const detalle = (qs('#detalle').value || '').trim();
+
+        const lines = [
+          'Hola, buen día. Solicito *desbloqueo de cuenta* en Remeex Visa.',
+          '',
+          '*Datos del cliente*:',
+          `• Nombre y apellido: ${nombre} ${apellido}`,
+          `• Cédula: ${cedula}`,
+          `• Email asociado: ${email}`,
+          '',
+          '*Motivo por el que no validé la cuenta*: ' + razon,
+          '*Motivo del bloqueo (conocido por el cliente)*: ' + motivo,
+          '*Titular de los fondos*: ' + titular,
+          '*Comprobantes de titularidad*: ' + comprobante,
+          detalle ? '\n*Descripción de mi caso*: ' + detalle : '',
+          '',
+          'Agradezco indicaciones para completar la validación y reactivar mi cuenta. ¡Gracias!'
+        ].filter(Boolean);
+
+        return lines.join('\n');
+      }
+
+      function updatePreviewAndLink(){
+        const msg = composeMessage();
+        preview.textContent = msg;
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(msg)}`;
+        sendWa.setAttribute('href', url);
+      }
+
+      function showSuspensionNoticeOnce(){
+        if (suspShown) return;
+        suspShown = true;
+        suspension.classList.add('is-on');
+      }
+
+      // Eventos overlay
+      btnSolicitar && btnSolicitar.addEventListener('click', showOverlay);
+      closeOverlay && closeOverlay.addEventListener('click', hideOverlay);
+      cancelWizard && cancelWizard.addEventListener('click', hideOverlay);
+
+      // Paso 1
+      next1 && next1.addEventListener('click', ()=>{
+        if(!valStep1()) return;
+        setStep(2);
+        const firstRadio = form.querySelector('input[name="razon"]');
+        firstRadio && firstRadio.focus();
+      });
+
+      // Paso 2
+      back2 && back2.addEventListener('click', ()=> setStep(1));
+
+      next2 && next2.addEventListener('click', ()=>{
+        if(!valStep2()) return;
+
+        // Mostrar spinner de análisis
+        spinner.classList.add('is-on');
+
+        // Simulación de análisis
+        setTimeout(()=>{
+          spinner.classList.remove('is-on');
+          setStep(3);
+          updatePreviewAndLink();
+          // Mostrar advertencia de suspensión (una sola vez)
+          showSuspensionNoticeOnce();
+          sendWa.focus();
+        }, 1200);
+      });
+
+      // Paso 3
+      back3 && back3.addEventListener('click', ()=> setStep(2));
+
+      // Actualiza preview si cambia algo estando en paso 3
+      form.addEventListener('input', ()=>{
+        const step3Visible = !steps.find(s=>s.getAttribute('data-step')==='3').classList.contains('hidden');
+        if(!step3Visible) return;
+        updatePreviewAndLink();
+      });
+
+      // Overlay suspensión
+      [suspDismiss, suspGo].forEach(btn=>{
+        btn && btn.addEventListener('click', ()=> suspension.classList.remove('is-on'));
+      });
+
+      // Cerrar wizard con ESC
+      document.addEventListener('keydown', (e)=>{
+        if(e.key === 'Escape' && !overlay.classList.contains('hidden')) hideOverlay();
+      });
     })();
   </script>
 </body>
