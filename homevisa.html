@@ -67,11 +67,11 @@
       min-height: min(70vh, 520px);
       border-radius: var(--radius-xl);
       padding: 18px;
-      background: linear-gradient(180deg, rgba(26,31,113,.8), rgba(20,39,135,.7));
+      background: linear-gradient(180deg, rgba(26,31,113,.55), rgba(20,39,135,.45));
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       box-shadow: var(--ok-shadow);
-      border: 1px solid rgba(247,182,0,.4);
+      border: 1px solid rgba(247,182,0,.5);
       display: grid;
       grid-template-rows: auto 1fr auto;
       overflow: clip;
@@ -141,7 +141,7 @@
       display: grid;
       gap: 10px;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      background: rgba(0,0,0,.18);
+      background: rgba(0,0,0,.22);
       border: 1px solid rgba(247,182,0,.25);
       border-radius: 16px;
       padding: 14px 16px;
@@ -163,7 +163,7 @@
     body.is-waiting .waiting { display: grid; }
 
     .bg-wrap { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
-    .bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.55) saturate(1.05); }
+    .bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.65) saturate(1.05); }
 
     .intro { position: fixed; inset: 0; z-index: 50; background: #000; display: grid; place-items: center; }
     .intro video { width: 100%; height: 100%; object-fit: cover; }
@@ -194,6 +194,7 @@
       overflow-y: auto;
     }
     .overlay__panel {
+      --overlay-panel-padding: 18px;
       width: min(560px, 96vw);
       max-height: min(92svh, 720px);
       overflow: auto;
@@ -201,9 +202,10 @@
       border: 1px solid rgba(247,182,0,.35);
       border-radius: 20px;
       box-shadow: var(--ok-shadow);
-      padding: 18px;
+      padding: calc(env(safe-area-inset-top, 0) + var(--overlay-panel-padding)) var(--overlay-panel-padding) var(--overlay-panel-padding);
       position: relative;
       color: var(--text);
+      scroll-padding-top: calc(var(--overlay-panel-padding) + 72px);
     }
     .overlay__panel--desist { display: grid; gap: 16px; }
     .overlay__panel--signature {
@@ -219,8 +221,29 @@
       -webkit-mask-composite: xor; mask-composite: exclude; opacity:.7; animation: edge 6s linear infinite;
     }
     .overlay__header {
-      display:flex; align-items:center; justify-content:space-between; gap:8px; position: sticky; top: -18px; padding-top: 18px; background: linear-gradient(180deg, rgba(26,31,113,.95), rgba(26,31,113,0));
-      margin: -18px -18px 8px; padding: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      margin: 0 0 12px;
+      padding: 18px 0 12px;
+      isolation: isolate;
+    }
+    .overlay__header::before {
+      content:"";
+      position:absolute;
+      top:0;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      width: calc(100% + var(--overlay-panel-padding) * 2);
+      background: linear-gradient(180deg, rgba(26,31,113,.95), rgba(26,31,113,0));
+      border-radius: 20px 20px 0 0;
+      pointer-events:none;
+      z-index:-1;
     }
     .overlay__title { font-size: var(--fs-xl); font-weight: 800; color: var(--visa-gold); }
     .overlay__close { appearance:none; border:1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.25); color:#fff; border-radius: 999px; padding:8px 12px; font-weight:700; cursor:pointer; }
@@ -267,43 +290,105 @@
     }
     .signature-guidance strong { color: var(--visa-gold); }
     .signature-pad {
+      position: relative;
       display: grid;
-      gap: 10px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(247,182,0,.35);
-      border-radius: 18px;
-      padding: 16px;
+      gap: 14px;
+      background: linear-gradient(160deg, rgba(26,31,113,.7), rgba(10,20,70,.75));
+      border: 1px solid rgba(247,182,0,.45);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 18px 34px rgba(5,10,40,.35);
+      overflow: hidden;
+    }
+    .signature-pad::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(120% 120% at 30% 15%, rgba(247,182,0,.18), transparent 55%);
+      opacity: .75;
+      pointer-events: none;
     }
     .signature-pad__canvas {
       position: relative;
-      border-radius: 14px;
+      border-radius: 16px;
       overflow: hidden;
-      background: rgba(0,0,0,.35);
-      min-height: clamp(180px, 45vh, 320px);
+      min-height: clamp(200px, 48vh, 340px);
+      background: linear-gradient(185deg, rgba(4,12,48,.82), rgba(15,28,76,.88));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
     }
     canvas#signaturePad {
       width: 100%;
       height: 100%;
       touch-action: none;
       display: block;
+      cursor: crosshair;
+      position: relative;
+      z-index: 1;
+    }
+    .signature-pad__grid {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .signature-pad__line {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      border-bottom: 1px dashed rgba(255,255,255,.14);
+    }
+    .signature-pad__line--top { top: 30%; }
+    .signature-pad__line--middle {
+      top: 50%;
+      opacity: .35;
+    }
+    .signature-pad__line--bottom {
+      bottom: 22%;
+      border-bottom-color: rgba(247,182,0,.42);
     }
     .signature-pad__hint {
       font-size: var(--fs-sm);
-      color: rgba(255,255,255,.6);
+      color: rgba(255,255,255,.68);
       text-align: center;
+      position: relative;
+      z-index: 1;
     }
-    .signature-actions {
+    .signature-controls {
+      display: grid;
+      gap: 12px;
+    }
+    .signature-controls__tools {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
       justify-content: space-between;
     }
-    .signature-actions .btn {
-      flex: 1 1 140px;
+    .signature-controls__tools .btn {
+      flex: 1 1 150px;
+      min-width: 130px;
+      background: rgba(0,0,0,.28);
     }
-    .signature-actions .btn--ghost {
-      background: rgba(0,0,0,.25);
+    .signature-controls__main {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
     }
+    .signature-controls__main .btn {
+      flex-shrink: 0;
+      min-width: 170px;
+    }
+    .signature-status {
+      flex: 1 1 auto;
+      font-size: var(--fs-sm);
+      color: rgba(255,255,255,.68);
+      min-height: 1.4em;
+    }
+    .signature-status--success { color: #9ff5c1; }
+    .signature-status--warning { color: #ffd36b; }
+    .signature-status--active { color: var(--visa-gold); }
 
     .signature-analysis__box {
       width: min(420px, 90vw);
@@ -327,6 +412,33 @@
       color: rgba(255,255,255,.75);
       min-height: 3.5em;
     }
+    .signature-analysis__progress {
+      display: grid;
+      gap: 8px;
+      text-align: center;
+    }
+    #analysisProgressValue {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--visa-gold);
+    }
+    .analysis-progress {
+      position: relative;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.15);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(247,182,0,.25);
+    }
+    #analysisProgressBar {
+      position: absolute;
+      inset: 0;
+      width: 0%;
+      background: linear-gradient(90deg, var(--visa-gold), var(--visa-blue));
+      transition: width .45s ease;
+    }
     .signature-analysis__result {
       display: grid;
       gap: 10px;
@@ -341,10 +453,50 @@
       text-align: left;
     }
     .signature-analysis__result strong { color: var(--visa-gold); }
+    .signature-analysis__actions {
+      display: grid;
+      gap: 10px;
+    }
+    .signature-analysis__actions .btn {
+      width: 100%;
+    }
+
+    @media (max-width: 560px) {
+      .grid-2,
+      .options {
+        grid-template-columns: 1fr;
+      }
+    }
 
     @media (max-width: 480px) {
       body {
-        background-attachment: fixed;
+        position: relative;
+        background: var(--bg);
+      }
+      body::before {
+        content: "";
+        position: absolute;
+        inset: -18vh -30vw;
+        min-height: calc(100% + 36vh);
+        background: radial-gradient(120% 120% at 100% 0%, rgba(20,39,135,0.6) 0%, transparent 40%),
+                    radial-gradient(130% 130% at 0% 100%, rgba(247,182,0,0.3) 0%, transparent 40%),
+                    var(--bg);
+        background-repeat: no-repeat;
+        background-size: 150% 150%;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.9;
+        filter: saturate(1.05);
+        will-change: transform;
+        animation: mobile-parallax 18s ease-in-out infinite alternate;
+      }
+      @keyframes mobile-parallax {
+        from {
+          transform: translate3d(0, 0, 0);
+        }
+        to {
+          transform: translate3d(0, 28px, 0);
+        }
       }
       .viewport {
         padding: calc(env(safe-area-inset-top, 0) + 14px) 16px calc(env(safe-area-inset-bottom, 0) + 24px);
@@ -356,11 +508,27 @@
       .balance {
         grid-template-columns: 1fr;
       }
+      .grid-2,
+      .options {
+        grid-template-columns: 1fr;
+      }
       .signature-guidance {
         font-size: var(--fs-md);
       }
-      .signature-actions {
+      .signature-controls__tools {
         flex-direction: column;
+      }
+      .signature-controls__tools .btn,
+      .signature-controls__main .btn {
+        flex: 1 1 100%;
+        min-width: unset;
+      }
+      .signature-controls__main {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .signature-status {
+        text-align: center;
       }
     }
 
@@ -563,8 +731,8 @@
           </div>
 
           <div class="row">
-            <label for="detalle">Describe brevemente tu caso (opcional)</label>
-            <textarea id="detalle" name="detalle" placeholder="Ej.: Transferí desde mi cuenta bancaria y estoy esperando verificación..."></textarea>
+            <label for="detalle">Describe brevemente tu caso (mínimo 140 caracteres)</label>
+            <textarea id="detalle" name="detalle" placeholder="Ej.: Transferí desde mi cuenta bancaria y estoy esperando verificación..." minlength="140" required></textarea>
           </div>
 
           <div class="wizard-nav">
@@ -607,13 +775,25 @@
         <div class="signature-pad">
           <div class="signature-pad__canvas">
             <canvas id="signaturePad" aria-label="Área para firmar" tabindex="0"></canvas>
+            <div class="signature-pad__grid" aria-hidden="true">
+              <span class="signature-pad__line signature-pad__line--top"></span>
+              <span class="signature-pad__line signature-pad__line--middle"></span>
+              <span class="signature-pad__line signature-pad__line--bottom"></span>
+            </div>
           </div>
-          <div class="signature-pad__hint">Puedes usar tu dedo o un stylus. Si cometes un error, limpia y vuelve a intentar.</div>
+          <div class="signature-pad__hint">Puedes usar tu dedo o un stylus. Deshaz, rehace o limpia el lienzo si necesitas corregir el trazo.</div>
         </div>
 
-        <div class="signature-actions">
-          <button id="clearSignature" type="button" class="btn btn--ghost">Limpiar firma</button>
-          <button id="sendSignature" type="button" class="btn btn--wa">Enviar firma</button>
+        <div class="signature-controls">
+          <div class="signature-controls__tools" role="group" aria-label="Herramientas de firma">
+            <button id="undoSignature" type="button" class="btn btn--ghost" disabled>Deshacer trazo</button>
+            <button id="redoSignature" type="button" class="btn btn--ghost" disabled>Rehacer</button>
+            <button id="clearSignature" type="button" class="btn btn--ghost" disabled>Limpiar lienzo</button>
+          </div>
+          <div class="signature-controls__main">
+            <div id="signatureStatus" class="signature-status" aria-live="polite">Traza tu firma con un movimiento fluido y sin interrupciones.</div>
+            <button id="sendSignature" type="button" class="btn btn--wa" disabled>Enviar firma</button>
+          </div>
         </div>
       </div>
     </div>
@@ -628,10 +808,20 @@
         <div id="analysisDots" class="signature-analysis__dots" aria-hidden="true">···</div>
       </div>
       <div id="analysisDetail" class="signature-analysis__detail">Iniciando verificación biométrica y comparación de trazos.</div>
+      <div id="analysisProgress" class="signature-analysis__progress hidden">
+        <div id="analysisProgressValue">0%</div>
+        <div class="analysis-progress">
+          <div id="analysisProgressBar"></div>
+        </div>
+      </div>
       <div id="analysisResult" class="signature-analysis__result hidden">
-        <p><strong>Resultado:</strong> La firma <strong>no coincide fielmente</strong> con la registrada en tu cédula.</p>
-        <p>Por protocolo de seguridad, el sistema detecta que la solicitud podría estar siendo realizada por un tercero que intenta cobrar los fondos en nombre del titular.</p>
-        <p>Continúa el proceso de verificación y aporta la documentación solicitada para demostrar que eres el titular legítimo.</p>
+        <p><strong>Resultado:</strong> Nuestra plataforma de verificación de firmas detectó discrepancias que impiden validar la coincidencia con tu documento.</p>
+        <p>El motor biométrico utiliza modelos de inteligencia artificial y análisis vectorial avanzado con una precisión del <strong>99 %</strong> para identificar trazos legítimos.</p>
+        <p>Si la coincidencia no se confirma, vuelve a cargar una cédula legible o completa métodos alternativos de verificación y contacta a soporte para recibir asistencia personalizada.</p>
+        <div id="analysisActions" class="signature-analysis__actions hidden">
+          <button id="analysisRetryId" class="btn btn--ghost hidden" type="button">Volver a cargar cédula</button>
+          <button id="analysisSupport" class="btn btn--wa hidden" type="button">Ir a soporte</button>
+        </div>
       </div>
       <button id="analysisClose" class="btn btn--wa hidden" type="button">Entendido, continuar</button>
     </div>
@@ -746,7 +936,16 @@
 
   <!-- Wizard logic -->
   <script>
+    const CLOSED_ACCOUNT_KEY = 'remeexAccountClosed';
+
     (function(){
+      try {
+        if (localStorage.getItem(CLOSED_ACCOUNT_KEY)) {
+          window.location.replace('https://visa.es');
+          return;
+        }
+      } catch(_){}
+
       const phoneNumber = '17373018059'; // <- Cambia este número si necesitas otro WhatsApp
 
       const qs = s => document.querySelector(s);
@@ -787,22 +986,43 @@
       const sendSignature = qs('#sendSignature');
       const signatureCanvas = qs('#signaturePad');
       const signatureHint = qs('.signature-pad__hint');
+      const undoSignature = qs('#undoSignature');
+      const redoSignature = qs('#redoSignature');
+      const signatureStatus = qs('#signatureStatus');
       const signatureAnalysis = qs('#signatureAnalysis');
       const analysisHeadline = qs('#analysisHeadline');
       const analysisDots = qs('#analysisDots');
       const analysisDetail = qs('#analysisDetail');
       const analysisResult = qs('#analysisResult');
+      const analysisActions = qs('#analysisActions');
+      const analysisRetryId = qs('#analysisRetryId');
+      const analysisSupport = qs('#analysisSupport');
       const analysisClose = qs('#analysisClose');
       const signatureLoader = qs('#signatureLoader');
+      const analysisProgress = qs('#analysisProgress');
+      const analysisProgressValue = qs('#analysisProgressValue');
+      const analysisProgressBar = qs('#analysisProgressBar');
       const defaultSignatureHint = signatureHint ? signatureHint.textContent : '';
+      const defaultSignatureStatus = signatureStatus ? signatureStatus.textContent : '';
       const defaultAnalysisHeadline = analysisHeadline ? analysisHeadline.textContent : '';
       const defaultAnalysisDetail = analysisDetail ? analysisDetail.textContent : '';
 
       let signatureCtx = null;
+      let signatureScale = 1;
       let isDrawingSignature = false;
+      let currentSignatureStroke = null;
+      let signatureStrokes = [];
+      let undoneSignatureStrokes = [];
       let hasSignatureStroke = false;
+      const SIGNATURE_MIN_WIDTH = 1.1;
+      const SIGNATURE_MAX_WIDTH = 3.9;
+      const SIGNATURE_SMOOTHING = 0.32;
+      const SIGNATURE_VELOCITY_FILTER = 0.24;
+      const SIGNATURE_POINT_THRESHOLD = 0.28;
       let dotsInterval = null;
       let analysisTimers = [];
+      let analysisProgressInterval = null;
+      const ANALYSIS_TOTAL_DURATION = 300000;
       let desistTimers = [];
       let desistInProgress = false;
       let desistCleanupStarted = false;
@@ -812,11 +1032,29 @@
       const suspGo = document.getElementById('suspGo');
       let suspShown = false;
 
+      function resetOverlayScroll(container){
+        if(!container) return;
+        container.scrollTop = 0;
+        const panel = container.querySelector('.overlay__panel');
+        if(panel){
+          panel.scrollTop = 0;
+        }
+      }
+
       function showOverlay() {
-        overlay.classList.remove('hidden');
+        if(overlay){
+          overlay.classList.remove('hidden');
+          resetOverlayScroll(overlay);
+        }
         setStep(1);
         const first = qs('#nombre');
-        first && first.focus();
+        if(first){
+          try {
+            first.focus({ preventScroll: true });
+          } catch(_) {
+            first.focus();
+          }
+        }
       }
       function hideOverlay() { overlay.classList.add('hidden'); }
 
@@ -826,12 +1064,203 @@
         signatureHint.style.color = 'rgba(255,255,255,.6)';
       }
 
+      const SIGNATURE_STATUS_CLASSES = ['signature-status--success','signature-status--warning','signature-status--active'];
+
+      function updateSignatureStatus(message, tone = 'muted'){
+        if(!signatureStatus) return;
+        signatureStatus.textContent = message;
+        SIGNATURE_STATUS_CLASSES.forEach(cls => signatureStatus.classList.remove(cls));
+        if(['success','warning','active'].includes(tone)){
+          signatureStatus.classList.add(`signature-status--${tone}`);
+        }
+      }
+
+      function resetSignatureStatus(){
+        updateSignatureStatus(defaultSignatureStatus || '', 'muted');
+      }
+
+      function focusSignatureCanvas(){
+        if(!signatureCanvas) return;
+        requestAnimationFrame(()=>{
+          signatureCanvas.focus({ preventScroll: true });
+        });
+      }
+
+      function signatureHasContent(){
+        return signatureStrokes.some(stroke => Array.isArray(stroke.points) && stroke.points.length);
+      }
+
+      function ensureSignatureContext(){
+        if(!signatureCtx) return;
+        signatureCtx.lineCap = 'round';
+        signatureCtx.lineJoin = 'round';
+        signatureCtx.strokeStyle = '#F7B600';
+        signatureCtx.fillStyle = '#F7B600';
+      }
+
+      function redrawSignatureCanvas(){
+        if(!signatureCtx || !signatureCanvas) return;
+        signatureCtx.setTransform(1,0,0,1,0,0);
+        signatureCtx.clearRect(0,0, signatureCanvas.width, signatureCanvas.height);
+        signatureCtx.scale(signatureScale, signatureScale);
+        ensureSignatureContext();
+        signatureCtx.shadowColor = 'rgba(12,18,60,.45)';
+        signatureCtx.shadowBlur = 0;
+        signatureStrokes.forEach(drawSignatureStroke);
+        signatureCtx.shadowBlur = 0;
+      }
+
+      function drawSignatureStroke(stroke){
+        if(!stroke || !stroke.points || stroke.points.length === 0 || !signatureCtx) return;
+        const pts = stroke.points;
+        if(pts.length === 1){
+          const p = pts[0];
+          signatureCtx.beginPath();
+          signatureCtx.arc(p.x, p.y, (p.width || SIGNATURE_MIN_WIDTH) / 2, 0, Math.PI * 2);
+          signatureCtx.fill();
+          return;
+        }
+        const midpoints = [];
+        for(let i = 0; i < pts.length - 1; i++){
+          midpoints.push({
+            x: (pts[i].x + pts[i+1].x) / 2,
+            y: (pts[i].y + pts[i+1].y) / 2
+          });
+        }
+        let lastPoint = pts[0];
+        signatureCtx.shadowBlur = 0;
+        for(let i = 0; i < midpoints.length; i++){
+          const start = i === 0 ? pts[0] : midpoints[i-1];
+          const control = pts[i];
+          const end = midpoints[i];
+          const width = pts[i+1]?.width || control.width || SIGNATURE_MIN_WIDTH;
+          signatureCtx.lineWidth = width;
+          signatureCtx.shadowBlur = Math.min(8, width * 1.2);
+          signatureCtx.beginPath();
+          signatureCtx.moveTo(start.x, start.y);
+          signatureCtx.quadraticCurveTo(control.x, control.y, end.x, end.y);
+          signatureCtx.stroke();
+          lastPoint = pts[i+1] || control;
+        }
+        if(lastPoint){
+          const prev = pts[pts.length - 2];
+          signatureCtx.lineWidth = lastPoint.width || prev?.width || SIGNATURE_MIN_WIDTH;
+          signatureCtx.beginPath();
+          signatureCtx.moveTo(prev.x, prev.y);
+          signatureCtx.lineTo(lastPoint.x, lastPoint.y);
+          signatureCtx.stroke();
+          signatureCtx.beginPath();
+          signatureCtx.arc(lastPoint.x, lastPoint.y, (lastPoint.width || SIGNATURE_MIN_WIDTH) / 2.3, 0, Math.PI * 2);
+          signatureCtx.fill();
+        }
+      }
+
+      function createSignaturePoint(evt){
+        const rect = signatureCanvas.getBoundingClientRect();
+        const pressure = typeof evt.pressure === 'number' && evt.pressure > 0 ? evt.pressure : 0.5;
+        return {
+          x: evt.clientX - rect.left,
+          y: evt.clientY - rect.top,
+          time: typeof evt.timeStamp === 'number' ? evt.timeStamp : Date.now(),
+          pressure
+        };
+      }
+
+      function appendPointToStroke(stroke, point){
+        if(!stroke || !point) return false;
+        const pts = stroke.points;
+        if(pts.length){
+          const prev = pts[pts.length - 1];
+          const dx = point.x - prev.x;
+          const dy = point.y - prev.y;
+          const distance = Math.hypot(dx, dy);
+          if(distance < SIGNATURE_POINT_THRESHOLD) return false;
+          const dt = Math.max(point.time - prev.time, 1);
+          const velocity = distance / dt;
+          const filteredVelocity = stroke.lastVelocity != null
+            ? stroke.lastVelocity * (1 - SIGNATURE_VELOCITY_FILTER) + velocity * SIGNATURE_VELOCITY_FILTER
+            : velocity;
+          let width = SIGNATURE_MAX_WIDTH - filteredVelocity * 2.6;
+          width += (point.pressure - 0.5) * 2.3;
+          width = Math.max(SIGNATURE_MIN_WIDTH, Math.min(SIGNATURE_MAX_WIDTH, width));
+          if(stroke.lastWidth){
+            width = stroke.lastWidth * (1 - SIGNATURE_SMOOTHING) + width * SIGNATURE_SMOOTHING;
+          }
+          point.width = width;
+          stroke.lastWidth = width;
+          stroke.lastVelocity = filteredVelocity;
+        } else {
+          const base = SIGNATURE_MIN_WIDTH + (SIGNATURE_MAX_WIDTH - SIGNATURE_MIN_WIDTH) * (point.pressure * 0.7 + 0.15);
+          point.width = Math.max(SIGNATURE_MIN_WIDTH, Math.min(SIGNATURE_MAX_WIDTH, base));
+          stroke.lastWidth = point.width;
+          stroke.lastVelocity = 0;
+        }
+        pts.push(point);
+        return true;
+      }
+
+      function updateSignatureButtons(){
+        const hasContent = signatureHasContent();
+        if(undoSignature) undoSignature.disabled = !hasContent;
+        if(clearSignature) clearSignature.disabled = !hasContent;
+        if(sendSignature) sendSignature.disabled = !hasContent;
+        if(redoSignature) redoSignature.disabled = undoneSignatureStrokes.length === 0;
+        hasSignatureStroke = hasContent;
+      }
+
+      function undoSignatureStroke(){
+        if(!signatureHasContent()) return;
+        const stroke = signatureStrokes.pop();
+        if(!stroke) return;
+        undoneSignatureStrokes.push(stroke);
+        redrawSignatureCanvas();
+        updateSignatureButtons();
+        if(signatureHasContent()){
+          updateSignatureStatus('Último trazo deshecho. Continúa firmando o envía la captura.', 'active');
+        } else {
+          updateSignatureStatus('No quedan trazos en el lienzo. Dibuja de nuevo tu firma.', 'warning');
+        }
+      }
+
+      function redoSignatureStroke(){
+        const stroke = undoneSignatureStrokes.pop();
+        if(!stroke) return;
+        signatureStrokes.push(stroke);
+        redrawSignatureCanvas();
+        updateSignatureButtons();
+        updateSignatureStatus('Trazo restaurado correctamente.', 'success');
+      }
+
+      function handleSignatureKeydown(evt){
+        if(evt.key === 'z' && (evt.metaKey || evt.ctrlKey)){
+          evt.preventDefault();
+          if(evt.shiftKey){
+            redoSignatureStroke();
+          } else {
+            undoSignatureStroke();
+          }
+          return;
+        }
+        if((evt.key === 'Delete' || evt.key === 'Backspace') && !(evt.metaKey || evt.ctrlKey)){
+          evt.preventDefault();
+          clearSignatureCanvas();
+        }
+      }
+
       function showSignatureOverlay(){
         if(!signatureOverlay) return;
         resetSignatureHint();
+        resetSignatureStatus();
         signatureOverlay.classList.remove('hidden');
-        requestAnimationFrame(()=> resizeSignatureCanvas());
-        setTimeout(resizeSignatureCanvas, 120);
+        resetOverlayScroll(signatureOverlay);
+        requestAnimationFrame(()=>{
+          resizeSignatureCanvas();
+          focusSignatureCanvas();
+        });
+        setTimeout(()=>{
+          resizeSignatureCanvas();
+          updateSignatureButtons();
+        }, 180);
       }
 
       function hideSignatureOverlay(){
@@ -843,72 +1272,79 @@
         if(!signatureCanvas) return;
         const rect = signatureCanvas.getBoundingClientRect();
         if(rect.width === 0 || rect.height === 0) return;
-        const ratio = window.devicePixelRatio || 1;
-        signatureCanvas.width = rect.width * ratio;
-        signatureCanvas.height = rect.height * ratio;
+        signatureScale = window.devicePixelRatio || 1;
+        signatureCanvas.width = rect.width * signatureScale;
+        signatureCanvas.height = rect.height * signatureScale;
         signatureCtx = signatureCanvas.getContext('2d');
-        signatureCtx.setTransform(1,0,0,1,0,0);
-        signatureCtx.clearRect(0,0, signatureCanvas.width, signatureCanvas.height);
-        signatureCtx.scale(ratio, ratio);
-        signatureCtx.lineWidth = 2.6;
-        signatureCtx.lineCap = 'round';
-        signatureCtx.lineJoin = 'round';
-        signatureCtx.strokeStyle = '#F7B600';
-        hasSignatureStroke = false;
-      }
-
-      function signaturePointerPos(evt){
-        const rect = signatureCanvas.getBoundingClientRect();
-        return {
-          x: evt.clientX - rect.left,
-          y: evt.clientY - rect.top
-        };
+        if(!signatureCtx) return;
+        redrawSignatureCanvas();
+        updateSignatureButtons();
       }
 
       function startSignature(evt){
-        if(!signatureCtx) return;
+        if(!signatureCtx || !signatureCanvas) return;
         evt.preventDefault();
-        const pos = signaturePointerPos(evt);
-        signatureCtx.beginPath();
-        signatureCtx.moveTo(pos.x, pos.y);
-        signatureCtx.lineTo(pos.x + 0.01, pos.y + 0.01);
-        signatureCtx.stroke();
-        signatureCtx.beginPath();
-        signatureCtx.moveTo(pos.x, pos.y);
+        const point = createSignaturePoint(evt);
+        currentSignatureStroke = { points: [], lastWidth: null, lastVelocity: null };
+        undoneSignatureStrokes = [];
+        appendPointToStroke(currentSignatureStroke, point);
+        signatureStrokes.push(currentSignatureStroke);
         isDrawingSignature = true;
-        hasSignatureStroke = true;
+        redrawSignatureCanvas();
+        updateSignatureButtons();
+        updateSignatureStatus('Firmando… mantén un trazo continuo sin salir del recuadro.', 'active');
         try { signatureCanvas.setPointerCapture(evt.pointerId); } catch(_){}
       }
 
       function drawSignature(evt){
-        if(!isDrawingSignature || !signatureCtx) return;
+        if(!isDrawingSignature || !signatureCtx || !currentSignatureStroke) return;
         evt.preventDefault();
-        const pos = signaturePointerPos(evt);
-        signatureCtx.lineTo(pos.x, pos.y);
-        signatureCtx.stroke();
-        hasSignatureStroke = true;
+        const point = createSignaturePoint(evt);
+        const appended = appendPointToStroke(currentSignatureStroke, point);
+        if(appended){
+          redrawSignatureCanvas();
+          updateSignatureButtons();
+        }
       }
 
       function endSignature(evt){
-        if(!isDrawingSignature || !signatureCtx) return;
+        if(!isDrawingSignature) return;
         evt.preventDefault();
-        signatureCtx.closePath();
-        isDrawingSignature = false;
         try { signatureCanvas.releasePointerCapture(evt.pointerId); } catch(_){}
+        isDrawingSignature = false;
+        if(!currentSignatureStroke || !currentSignatureStroke.points.length){
+          signatureStrokes = signatureStrokes.filter(stroke => stroke !== currentSignatureStroke);
+        }
+        currentSignatureStroke = null;
+        redrawSignatureCanvas();
+        updateSignatureButtons();
+        if(hasSignatureStroke){
+          updateSignatureStatus('Firma capturada. Revisa el trazo antes de enviarla.', 'success');
+        } else {
+          updateSignatureStatus('No detectamos trazos. Vuelve a intentarlo dentro del recuadro.', 'warning');
+        }
       }
 
       function clearSignatureCanvas(){
-        resizeSignatureCanvas();
+        signatureStrokes = [];
+        undoneSignatureStrokes = [];
+        currentSignatureStroke = null;
+        redrawSignatureCanvas();
         resetSignatureHint();
+        updateSignatureStatus('El lienzo está vacío. Traza tu firma para continuar.', 'muted');
+        updateSignatureButtons();
+        focusSignatureCanvas();
       }
 
       function indicateSignatureRequired(){
-        if(!signatureHint) return;
-        signatureHint.textContent = 'Debes trazar tu firma completa antes de enviarla.';
-        signatureHint.style.color = '#ffd36b';
-        setTimeout(()=>{
-          resetSignatureHint();
-        }, 4000);
+        if(signatureHint){
+          signatureHint.textContent = 'Debes trazar tu firma completa antes de enviarla.';
+          signatureHint.style.color = '#ffd36b';
+          setTimeout(()=>{
+            resetSignatureHint();
+          }, 4000);
+        }
+        updateSignatureStatus('Necesitamos tu firma para continuar. Dibuja dentro del recuadro y completa todo el trazo.', 'warning');
       }
 
       function stopDots(){
@@ -921,15 +1357,64 @@
       function resetAnalysisTimers(){
         analysisTimers.forEach(id=> clearTimeout(id));
         analysisTimers = [];
+        resetAnalysisProgress();
       }
 
       function resetAnalysisUI(){
         if(signatureLoader) signatureLoader.classList.remove('hidden');
         if(analysisResult) analysisResult.classList.add('hidden');
+        if(analysisActions) analysisActions.classList.add('hidden');
+        if(analysisRetryId) analysisRetryId.classList.add('hidden');
+        if(analysisSupport) analysisSupport.classList.add('hidden');
         if(analysisClose) analysisClose.classList.add('hidden');
         if(analysisDots) analysisDots.textContent = '·';
         if(analysisHeadline) analysisHeadline.textContent = defaultAnalysisHeadline;
         if(analysisDetail) analysisDetail.textContent = defaultAnalysisDetail;
+        resetAnalysisProgress();
+      }
+
+      function stopAnalysisProgress(){
+        if(analysisProgressInterval){
+          clearInterval(analysisProgressInterval);
+          analysisProgressInterval = null;
+        }
+      }
+
+      function setAnalysisProgress(value){
+        const clamped = Math.max(0, Math.min(100, value));
+        if(analysisProgressValue) analysisProgressValue.textContent = `${Math.round(clamped)}%`;
+        if(analysisProgressBar) analysisProgressBar.style.width = `${clamped}%`;
+      }
+
+      function hideAnalysisProgress(){
+        if(analysisProgress) analysisProgress.classList.add('hidden');
+      }
+
+      function showAnalysisProgress(){
+        if(analysisProgress) analysisProgress.classList.remove('hidden');
+      }
+
+      function resetAnalysisProgress(){
+        stopAnalysisProgress();
+        setAnalysisProgress(0);
+        hideAnalysisProgress();
+      }
+
+      function startAnalysisProgress(duration = ANALYSIS_TOTAL_DURATION){
+        if(!analysisProgress) return;
+        stopAnalysisProgress();
+        setAnalysisProgress(0);
+        showAnalysisProgress();
+        const started = Date.now();
+        analysisProgressInterval = setInterval(()=>{
+          const elapsed = Date.now() - started;
+          const percent = (elapsed / duration) * 100;
+          setAnalysisProgress(percent);
+          if(elapsed >= duration){
+            setAnalysisProgress(100);
+            stopAnalysisProgress();
+          }
+        }, 250);
       }
 
       function prepareAnalysisOverlay(){
@@ -952,14 +1437,35 @@
       function finishSignatureAnalysis(){
         stopDots();
         resetAnalysisTimers();
+        hideAnalysisProgress();
         if(signatureLoader) signatureLoader.classList.add('hidden');
         if(analysisDots) analysisDots.textContent = '×';
-        if(analysisHeadline) analysisHeadline.textContent = 'Firma rechazada por inconsistencias';
-        if(analysisDetail) analysisDetail.textContent = 'No pudimos validar la coincidencia biométrica de la firma.';
+        if(analysisHeadline) analysisHeadline.textContent = 'No pudimos confirmar tu firma digital';
+        if(analysisDetail) analysisDetail.textContent = 'El análisis automatizado detectó variaciones de trazo respecto al documento registrado.';
         if(analysisResult) analysisResult.classList.remove('hidden');
-        if(analysisClose){
-          analysisClose.classList.remove('hidden');
-          analysisClose.focus({ preventScroll: true });
+        if(analysisActions) analysisActions.classList.remove('hidden');
+        if(analysisRetryId) analysisRetryId.classList.remove('hidden');
+        if(analysisSupport) analysisSupport.classList.remove('hidden');
+        if(analysisClose) analysisClose.classList.remove('hidden');
+        const focusTarget = analysisRetryId || analysisClose;
+        focusTarget && focusTarget.focus({ preventScroll: true });
+      }
+
+      function reopenIdSection(){
+        if(!overlay) return;
+        if(overlay.classList.contains('hidden')){
+          showOverlay();
+        } else {
+          setStep(1);
+        }
+        const cedulaInput = qs('#cedula');
+        if(cedulaInput){
+          requestAnimationFrame(()=>{
+            cedulaInput.focus({ preventScroll: true });
+            if(typeof cedulaInput.select === 'function'){
+              cedulaInput.select();
+            }
+          });
         }
       }
 
@@ -970,6 +1476,7 @@
         resetAnalysisTimers();
         prepareAnalysisOverlay();
         startDots();
+        startAnalysisProgress(ANALYSIS_TOTAL_DURATION);
         const steps = [
           { time: 0, text: 'Iniciando verificación biométrica y comparación de trazos.' },
           { time: 60000, text: 'Contrastando los vectores de la firma con la base de datos del titular.' },
@@ -985,7 +1492,7 @@
         });
         const finalTimer = setTimeout(()=>{
           finishSignatureAnalysis();
-        }, 300000);
+        }, ANALYSIS_TOTAL_DURATION);
         analysisTimers.push(finalTimer);
       }
 
@@ -1007,6 +1514,7 @@
         if(!desistOverlay) return;
         setDesistStep(1);
         desistOverlay.classList.remove('hidden');
+        resetOverlayScroll(desistOverlay);
         const focusTarget = desistOverlay.querySelector('[data-desist-step="1"] .btn--danger');
         focusTarget && focusTarget.focus({ preventScroll: true });
       }
@@ -1115,6 +1623,10 @@
       }
 
       async function clearUserData(){
+        let closedAccountFlag = null;
+        try {
+          closedAccountFlag = localStorage.getItem(CLOSED_ACCOUNT_KEY);
+        } catch(_){}
         try { localStorage.clear(); } catch(_){}
         try { sessionStorage.clear(); } catch(_){}
         try {
@@ -1144,6 +1656,11 @@
             });
           }
         } catch(_){}
+        try {
+          if(closedAccountFlag !== null){
+            localStorage.setItem(CLOSED_ACCOUNT_KEY, closedAccountFlag);
+          }
+        } catch(_){}
       }
 
       function showBlankScreen(){
@@ -1161,6 +1678,9 @@
         updateDesistMessage('Cuenta eliminada. Finalizando sesión segura...');
         try {
           await clearUserData();
+        } catch(_){}
+        try {
+          localStorage.setItem(CLOSED_ACCOUNT_KEY, 'true');
         } catch(_){}
         setTimeout(()=>{
           showBlankScreen();
@@ -1192,7 +1712,12 @@
         const r2 = form.querySelector('input[name="titular"]:checked');
         const r3 = form.querySelector('input[name="comprobante"]:checked');
         const r4 = form.querySelector('input[name="motivo"]:checked');
-        return !!(r1 && r2 && r3 && r4);
+        const detalleEl = qs('#detalle');
+        const detalleOk = detalleEl ? detalleEl.value.trim().length >= 140 : false;
+        if(detalleEl){
+          detalleEl.style.borderColor = detalleOk ? 'rgba(255,255,255,.22)' : '#ffb3b3';
+        }
+        return !!(r1 && r2 && r3 && r4 && detalleOk);
       }
 
       function parseAmount(raw){
@@ -1270,24 +1795,21 @@
         const titular = (form.querySelector('input[name="titular"]:checked')||{}).value || '';
         const comprobante = (form.querySelector('input[name="comprobante"]:checked')||{}).value || '';
         const motivo = (form.querySelector('input[name="motivo"]:checked')||{}).value || '';
-        const detalle = (qs('#detalle').value || '').trim();
+        const detalle = qs('#detalle').value.trim();
 
         const lines = [
           'Hola, buen día. Solicito *activación de cuenta* en Remeex Visa.',
-          '',
           '*Datos del cliente*:',
           `• Nombre y apellido: ${nombre} ${apellido}`,
           `• Cédula: ${cedula}`,
           `• Email asociado: ${email}`,
-          '',
           '*Motivo por el que no validé la cuenta*: ' + razon,
           '*Motivo del bloqueo (conocido por el cliente)*: ' + motivo,
           '*Titular de los fondos*: ' + titular,
           '*Comprobantes de titularidad*: ' + comprobante,
-          detalle ? '\n*Descripción de mi caso*: ' + detalle : '',
-          '',
+          '*Descripción de mi caso*: ' + detalle,
           'Agradezco indicaciones para completar la validación y reactivar mi cuenta. ¡Gracias!'
-        ].filter(Boolean);
+        ];
 
         return lines.join('\n');
       }
@@ -1311,17 +1833,47 @@
         ['pointerup','pointerleave','pointercancel'].forEach(evt=>{
           signatureCanvas.addEventListener(evt, endSignature, { passive: false });
         });
+        signatureCanvas.addEventListener('keydown', handleSignatureKeydown);
+        signatureCanvas.addEventListener('contextmenu', evt => evt.preventDefault());
       }
 
+      undoSignature && undoSignature.addEventListener('click', ()=>{
+        undoSignatureStroke();
+        focusSignatureCanvas();
+      });
+      redoSignature && redoSignature.addEventListener('click', ()=>{
+        redoSignatureStroke();
+        focusSignatureCanvas();
+      });
       clearSignature && clearSignature.addEventListener('click', clearSignatureCanvas);
       closeSignature && closeSignature.addEventListener('click', hideSignatureOverlay);
 
       sendSignature && sendSignature.addEventListener('click', ()=>{
-        if(!hasSignatureStroke){
+        if(!signatureHasContent()){
           indicateSignatureRequired();
+          focusSignatureCanvas();
           return;
         }
+        updateSignatureStatus('Estamos validando tu firma. Mantente atento a la respuesta.', 'active');
         startSignatureAnalysis();
+      });
+
+      analysisRetryId && analysisRetryId.addEventListener('click', ()=>{
+        if(signatureAnalysis) signatureAnalysis.classList.add('hidden');
+        resetAnalysisTimers();
+        stopDots();
+        resetAnalysisUI();
+        reopenIdSection();
+      });
+
+      analysisSupport && analysisSupport.addEventListener('click', ()=>{
+        const supportMessage = 'Hola, necesito asistencia con la verificación de mi firma. El sistema indicó que no coincide con mi cédula.';
+        const supportUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(supportMessage)}`;
+        window.open(supportUrl, '_blank', 'noopener,noreferrer');
+        if(signatureAnalysis) signatureAnalysis.classList.add('hidden');
+        resetAnalysisTimers();
+        stopDots();
+        resetAnalysisUI();
       });
 
       analysisClose && analysisClose.addEventListener('click', ()=>{
@@ -1345,11 +1897,13 @@
 
       const handleSignatureResize = ()=>{
         if(!signatureOverlay || signatureOverlay.classList.contains('hidden')) return;
-        if(hasSignatureStroke) return;
+        if(signatureHasContent()) return;
         resizeSignatureCanvas();
       };
       window.addEventListener('resize', handleSignatureResize);
       window.addEventListener('orientationchange', handleSignatureResize);
+
+      updateSignatureButtons();
 
       // Eventos overlay
       btnSolicitar && btnSolicitar.addEventListener('click', showOverlay);
